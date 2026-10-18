@@ -8,9 +8,29 @@ function setBusy(on) {
   $('estimate').disabled = on || !capsReady || !dbRef || !sampleRef;
 }
 
-function showPreview(parts, note) {
+/* Name der Mahlzeit in der Vorschau: Vorschlag von Claude, bis die Person selbst etwas eintippt */
+var previewName = null, previewNameTouched = false;
+function cleanName(s) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60); }
+function mergingPreview() { return !!(addTarget && addTarget.date === viewKey); }
+function setPreviewName(n) {
+  n = cleanName(n);
+  if (!n || previewNameTouched) return;
+  previewName = n;
+  var inp = $('p-name');
+  if (inp) inp.value = n;
+}
+async function suggestMealName(parts) {
+  if (!sampleRef || mergingPreview()) return;
+  try {
+    var r = await sampleRef.json('Give a short German name for this meal, 1 to 4 words, the way a person would call it (for example "Döner-Teller", "Obstschale", "Nudeln mit Fischstäbchen"). No amounts, no calories. Reply with JSON only: {"meal_name":string}\nFoods: ' + JSON.stringify(parts.map(partText)), { modelTier: 'quick', cache: false });
+    if (pending && pending.parts === parts) setPreviewName(r && r.meal_name);
+  } catch (e) {}
+}
+
+function showPreview(parts, note, name) {
   var box = $('preview');
   box.replaceChildren();
+  if (name !== undefined) { previewName = cleanName(name); previewNameTouched = false; }
   var inputs = [];
   var wrap = el('div', 'tbl-wrap');
   var tbl = el('table', 'ntable');
@@ -167,10 +187,25 @@ function showPreview(parts, note) {
 
   tbl.append(colgroup(), thead(), body);
   wrap.append(tbl);
+  if (!mergingPreview()) {
+    var nrow = el('div', 'goal');
+    var nl = el('label', null, 'Name der Mahlzeit');
+    nl.htmlFor = 'p-name';
+    var ni = el('input', 'name-in');
+    ni.type = 'text';
+    ni.id = 'p-name';
+    ni.maxLength = 60;
+    ni.value = previewName || '';
+    ni.placeholder = fallbackMealName(parts);
+    doneKey(ni);
+    ni.addEventListener('input', function () { previewName = ni.value; previewNameTouched = true; });
+    nrow.append(nl, ni);
+    box.append(nrow);
+  }
   box.append(wrap);
   var pvInfo = [];
   if (note) pvInfo.push(String(note).slice(0, 300));
-  pvInfo.push((addTarget && addTarget.date === viewKey ? 'Wird zur Mahlzeit von ' + String(addTarget.meal.time || '–').slice(0, 5) + ' ergänzt (' + dayLabel(viewKey) + ')' : 'Wird eingetragen für: ' + dayLabel(viewKey)) + '. In der Vorschau kannst du Menge, Einheit und alle Werte ändern oder ein Lebensmittel entfernen. Ändert sich die Menge, passen sich die Werte an.');
+  pvInfo.push((mergingPreview() ? 'Wird zur Mahlzeit von ' + String(addTarget.meal.time || '–').slice(0, 5) + ' ergänzt (' + dayLabel(viewKey) + ')' : 'Wird eingetragen für: ' + dayLabel(viewKey)) + '. In der Vorschau kannst du Menge, Einheit und alle Werte ändern oder ein Lebensmittel entfernen. Ändert sich die Menge, passen sich die Werte an.');
   box.append(infoEl(pvInfo));
   var actions = el('div', 'row');
   var save = el('button', 'btn', 'Mahlzeit speichern');
@@ -204,7 +239,7 @@ $('model-tier').value = MODEL_SAVED;
 
 
 /* Änderungsmodus: Sobald eine Vorschau da ist, geht Text an Claude mit dem bisherigen Stand als Kontext */
-var changeMode = false, lastMealText = '', lastPhoto = null, lastPhotoCtx = '';
+var changeMode = false, lastMealText = '', lastPhoto = null, lastPhotoCtx = '', pickContext = '';
 var MEAL_PLACEHOLDER = '150 g Haferflocken, 250 ml Milch, 1 Banane (120 g)';
 function setChangeMode(on, restore) {
   var ta = $('meal-input');
@@ -215,7 +250,7 @@ function setChangeMode(on, restore) {
     ta.value = lastMealText;
   }
   changeMode = on;
-  if (!on) { lastMealText = ''; lastPhoto = null; lastPhotoCtx = ''; }
+  if (!on) { lastMealText = ''; lastPhoto = null; lastPhotoCtx = ''; pickContext = ''; previewName = null; previewNameTouched = false; }
   $('h-add').textContent = on ? 'Änderung vornehmen' : (addTarget && addTarget.date === viewKey ? 'Mahlzeit ergänzen' : 'Mahlzeit hinzufügen');
   ta.placeholder = on ? 'Was soll geändert oder ergänzt werden? z. B. „Mango nur 80 g, dazu 1 EL Honig“' : MEAL_PLACEHOLDER;
   ta.setAttribute('aria-label', on ? 'Änderung oder Ergänzung für den Vorschlag' : 'Was hast du gegessen?');
@@ -235,7 +270,9 @@ function refinePrompt(prev, parts, change) {
     return o;
   });
   lines.push('You are revising a meal estimate you gave before. Below is everything the person gave you (original description and photo note, current items as JSON including their own edits, and their change request in German). Answer with the complete updated list of items in the Format above, "questions": [] and a short German note on what you changed.');
+  lines.push('meal_name: keep the current meal name unless the change makes it wrong or the person asks for a different name.');
   lines.push('Original description: """' + String(prev || '').replace(/"""/g, '"') + '"""');
+  lines.push('Current meal name: ' + JSON.stringify(cleanName(previewName)));
   lines.push('Current items: ' + JSON.stringify(cur));
   lines.push('Change request: """' + String(change).replace(/"""/g, '"') + '"""');
   return lines.join('\n');
@@ -250,7 +287,7 @@ async function refine() {
   setBusy(true);
   toast('');
   try {
-    var prevText = lastMealText + (lastPhotoCtx ? (lastMealText ? '\n' : '') + 'Note the person wrote with the photo: ' + lastPhotoCtx : '');
+    var prevText = [lastMealText, lastPhotoCtx ? 'Note the person wrote with the photo: ' + lastPhotoCtx : '', pickContext ? 'Items the person picked from their history (German): ' + pickContext : ''].filter(Boolean).join('\n');
     var cc = currentChoice();
     var so = { model: cc.model, modelTier: cc.tier, cache: false };
     if (lastPhoto) {
@@ -268,7 +305,10 @@ async function refine() {
     } else {
       $('meal-input').value = '';
       toast('');
+      var nn = cleanName(res && res.meal_name);
+      if (nn && nn !== cleanName(previewName)) { previewName = nn; previewNameTouched = false; }
       showPreview(np, res && res.note ? String(res.note) : 'Änderung übernommen. Prüfe die Werte.');
+      if (!cleanName(previewName)) suggestMealName(np);
     }
   } catch (e) {
     var code = e && e.code;
@@ -309,7 +349,8 @@ async function estimate() {
   try {
     if (!missing.length) {
       toast('');
-      showPreview(local, 'Alle Lebensmittel stammen aus deiner Datenbank bzw. dem BLS.');
+      showPreview(local, 'Alle Lebensmittel stammen aus deiner Datenbank bzw. dem BLS.', '');
+      suggestMealName(local);
       setBusy(false);
       return;
     }
@@ -366,7 +407,9 @@ async function estimate() {
     } else {
       toast('');
       var note = (local.length ? local.length + ' aus Datenbank/BLS. ' : '') + webNote + (res && res.note ? res.note : '');
-      showPreview(parts, note.trim());
+      var mn = cleanName(res && res.meal_name);
+      showPreview(parts, note.trim(), mn);
+      if (!mn) suggestMealName(parts);
     }
   } catch (e) {
     var code = e && e.code;
@@ -404,6 +447,7 @@ async function saveMeal() {
   var meal = {
     id: newId(),
     time: date === keyOf(now) ? pad(now.getHours()) + ':' + pad(now.getMinutes()) : '–',
+    name: cleanName(previewName) || fallbackMealName(parts),
     items: parts.map(partText).join(', ').slice(0, 300),
     kcal: parts.reduce(function (s, x) { return s + x.kcal; }, 0),
     parts: parts

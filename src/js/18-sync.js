@@ -31,7 +31,7 @@ function subscribeAll() {
   subscribe('favs', function (fail) {
     return dbRef.doc('settings/favorites').onSnapshot(function (snap) {
       var d = snap.exists ? snap.data() : null;
-      FAVS = d && Array.isArray(d.list) ? d.list.filter(function (f) { return f && f.key && f.meal; }) : [];
+      FAVS = d && Array.isArray(d.list) ? d.list.filter(function (f) { return f && f.key && (f.meal || (f.food && f.food.per100)); }) : [];
       if (pickOpen) pickOpen.rerender();
     }, fail);
   });

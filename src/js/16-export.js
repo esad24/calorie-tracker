@@ -23,7 +23,7 @@ function buildCsv() {
     (d.meals || []).forEach(function (m) {
       var parts = Array.isArray(m.parts) && m.parts.length ? m.parts : [null];
       parts.forEach(function (p) {
-        rows.push({ date: d.date, time: m.time || '', meal: m.items || '', food: p ? p.name : (m.items || ''), amount: p ? p.amount : '', nums: p || m });
+        rows.push({ date: d.date, time: m.time || '', meal: mealTitle(m), food: p ? p.name : (m.items || ''), amount: p ? p.amount : '', nums: p || m });
       });
     });
   });

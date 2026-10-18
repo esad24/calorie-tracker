@@ -219,6 +219,7 @@ async function saveMealEdit() {
       var cur = data.meals[idx];
       var upd = recomputeMeal(cur, d.parts);
       upd.time = d.time || '–';
+      upd.name = cleanName(d.name) || fallbackMealName(d.parts);
       upd.id = cur.id || newId();
       if (d.newDate === date) {
         var same = data.meals.slice();
@@ -269,7 +270,7 @@ function mealCard(m, date) {
   var dm = m;
   if (edit) {
     if (!mealDraft || mealDraft.key !== mkey) {
-      mealDraft = { key: mkey, date: date, orig: m, newDate: date, time: validTimeOf(m.time), dirty: false, parts: partsOf(m).map(function (pp) { var c = Object.assign({}, pp); delete c._pi; return c; }) };
+      mealDraft = { key: mkey, date: date, orig: m, newDate: date, time: validTimeOf(m.time), name: mealTitle(m), dirty: false, parts: partsOf(m).map(function (pp) { var c = Object.assign({}, pp); delete c._pi; return c; }) };
     }
     dm = recomputeMeal(m, mealDraft.parts);
     dm.time = mealDraft.time || '–';
@@ -280,6 +281,11 @@ function mealCard(m, date) {
   pen.addEventListener('click', function () { editKey = edit ? null : mkey; mealDraft = null; render(true); });
   var rm = iconBtn('trash', 'Mahlzeit entfernen', '');
   confirmTap(rm, function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); }, 'Mahlzeit löschen?', 'Alle Lebensmittel dieser Mahlzeit werden entfernt.');
+  var fav = isFav(mealKeyOf(m));
+  var star = iconBtn('star', fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen', fav ? 'fav-on' : '');
+  star.setAttribute('aria-pressed', String(fav));
+  star.disabled = !editable;
+  star.addEventListener('click', async function () { star.disabled = true; await toggleFavMeal(m); render(true); });
   var plus = null;
   if (edit) {
     plus = iconBtn('plus', 'Lebensmittel ergänzen', '');
@@ -323,6 +329,7 @@ function mealCard(m, date) {
     left.append(di, ti, el('span', 'mc-count', parts.length + ' Lebensmittel'));
   } else {
     left.append(
+      el('span', 'mc-name', mealTitle(m)),
       el('span', 'mc-time', String(m.time || '–').slice(0, 5)),
       el('span', 'mc-count', parts.length + ' Lebensmittel')
     );
@@ -330,9 +337,21 @@ function mealCard(m, date) {
   if (pill) left.append(pill);
   var acts = el('div', 'mc-actions');
   if (plus) acts.append(plus);
-  if (edit) acts.append(rm);
+  if (edit) acts.append(rm); else acts.append(star);
   acts.append(pen);
   head.append(left, el('span', 'mc-kcal', fmtN(Number(dm.kcal) || 0) + ' kcal'), acts);
+  if (edit) {
+    var nm = el('input', 'name-in mc-name-in');
+    nm.type = 'text';
+    nm.id = 'mn-' + safe;
+    nm.maxLength = 60;
+    nm.value = mealDraft.name;
+    nm.placeholder = fallbackMealName(mealDraft.parts);
+    nm.setAttribute('aria-label', 'Name der Mahlzeit');
+    doneKey(nm);
+    nm.addEventListener('input', function () { mealDraft.name = nm.value; mealDraft.dirty = true; });
+    head.append(nm);
+  }
   var wrap = el('div', 'tbl-wrap');
   var tbl = el('table', 'ntable');
   var body = document.createElement('tbody');

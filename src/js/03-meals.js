@@ -29,9 +29,24 @@ function gramsPer(unitG, unit) {
   if (unit === 'g' || unit === 'ml') return 1;
   return unitG > 0 ? unitG : null;
 }
+function gramsOf(p) {
+  var o = qtyOf(p);
+  var g = gramsPer(o.unitG, o.unit);
+  return o.qty > 0 && g ? o.qty * g : null;
+}
 function partText(p) {
   var o = qtyOf(p);
   return (o.qty > 0 ? fmtQty(o.qty) + ' ' + o.unit + ' ' : '') + String(p.name || '');
+}
+
+/* Name einer Mahlzeit: von Claude vorgeschlagen oder selbst vergeben; sonst aus den Lebensmitteln */
+function fallbackMealName(parts) {
+  var names = parts.map(function (p) { return String(p.name || '').split(/[,(]/)[0].trim(); }).filter(Boolean);
+  if (!names.length) return '';
+  return (names.length > 2 ? names.slice(0, 2).join(', ') + ' u. a.' : names.join(' & ')).slice(0, 60);
+}
+function mealTitle(m) {
+  return String(m.name || '').trim() || fallbackMealName(Array.isArray(m.parts) ? m.parts : []) || String(m.items || '').slice(0, 60);
 }
 
 /* Daten */

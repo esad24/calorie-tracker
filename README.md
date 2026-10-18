@@ -27,7 +27,7 @@ src/
     14-controls.js      navigation/settings event wiring
     15-photo.js         barcode scan, nutrition-label / meal photos
     16-export.js        CSV / JSON export
-    17-favorites.js     recent meals & favorites picker
+    17-picker.js        past foods (per 100 g) & favorites picker, multi-select
     18-sync.js          live DB subscriptions, startup
 scripts/
   build.mjs         builds dist/index.html (single file) + dist/bls.json
@@ -58,6 +58,6 @@ file. The page needs the artifact runtime capabilities `db`, `sample`, `mcp`
 `data/db/` (gitignored, kept out of this public repo) mirrors the artifact
 database, one JSON file per document:
 
-- `days/<YYYY-MM-DD>.json` – meals (with per-food `parts`), water, coffee, cola, `cafLog`
+- `days/<YYYY-MM-DD>.json` – meals (`name`, per-food `parts` with `qty`/`unit`), water, coffee, cola, `cafLog`
 - `foods/<key>.json` – saved foods with values per 100 g
-- `settings/goals.json`, `settings/favorites.json`
+- `settings/goals.json`, `settings/favorites.json` (entries are `{type: 'meal', meal}` or `{type: 'food', food}`)

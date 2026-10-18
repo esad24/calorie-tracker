@@ -13,7 +13,7 @@ function labelPrompt(ctx) {
     '- fat is total fat, carbs is total carbohydrate, sugar is "davon Zucker" (never more than carbs). salt is in grams; if only sodium is printed, salt = sodium in g x 2.5. potassium (Kalium) in mg, null if not printed.',
     '- A value that is not printed is 0 (potassium: null). "<0,5" means 0.5. Use a dot as decimal separator in the JSON.',
     '- serving_g: grams or ml of one serving, portion or piece when the label states it (for example "Portion 30 g"), otherwise null.',
-    '- name: the product name only if it is visible in the image, otherwise null.',
+    '- name: the product name only if it is visible in the image, otherwise null. For type meal: a short German name for the whole meal, 1 to 4 words (for example "Döner-Teller").',
     '- gi: your best estimate of the glycemic index of the food as eaten (University of Sydney tables), an integer; null when carbs are under 2 g.',
     '- If the image does not show a readable nutrition table, set found to false.',
     '- note: at most one short German sentence about anything unclear (blurry digits, values that do not fit together).',
@@ -86,7 +86,8 @@ $('nut-file').addEventListener('change', async function () {
       mp.forEach(function (p) { p.estimate = true; });
       if (mp.length) {
         toast('');
-        showPreview(mp, r.note ? String(r.note).slice(0, 240) : 'Mahlzeit aus Foto geschätzt. Prüfe die Mengen.');
+        showPreview(mp, r.note ? String(r.note).slice(0, 240) : 'Mahlzeit aus Foto geschätzt. Prüfe die Mengen.', cleanName(r.name));
+        if (!cleanName(r.name)) suggestMealName(mp);
         setBusy(false);
         return;
       }
