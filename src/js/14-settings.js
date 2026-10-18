@@ -1,15 +1,16 @@
   /* Einstellungen */
-  var GOAL_FIELDS = [{ key: 'kcal', label: 'Kalorien', unit: 'kcal', dec: 0 }].concat(NUTS.map(function (n) {
-    return { key: n.key, label: n.label + (n.max ? ' (Maximum)' : ''), unit: n.key === 'potassium' ? 'g' : n.unit, dec: n.dec, div: n.key === 'potassium' ? 1000 : 0 };
+  /* grid: which settings group the field appears in */
+  var GOAL_FIELDS = [{ key: 'kcal', label: 'Kalorien', unit: 'kcal', dec: 0, grid: 'goal-grid' }].concat(NUTS.map(function (n) {
+    return { key: n.key, label: n.label, note: n.max ? 'Maximum' : '', unit: n.key === 'potassium' ? 'g' : n.unit, dec: n.dec, div: n.key === 'potassium' ? 1000 : 0, grid: 'goal-grid' };
   })).concat([
-    { key: 'water', label: 'Wasser', unit: 'ml', dec: 0, def: 2500 },
-    { key: 'glLow', label: 'GL pro Tag: niedrig bis', unit: 'GL', dec: 0, def: 80 },
-    { key: 'glMid', label: 'GL pro Tag: mittel bis', unit: 'GL', dec: 0, def: 120 },
-    { key: 'caffeine', label: 'Koffein (Maximum)', unit: 'mg', dec: 0, def: 400 },
-    { key: 'weight', label: 'Körpergewicht', unit: 'kg', dec: 1, def: 70 },
-    { key: 'cafCutoff', label: 'Kein Koffein nach (Uhr)', unit: 'Uhr', dec: 0, def: 15 },
-    { key: 'nakGood', label: 'Na:K gut ab (1 : x)', unit: 'x', dec: 1, def: 2 },
-    { key: 'nakMid', label: 'Na:K mittel ab (1 : x)', unit: 'x', dec: 1, def: 1 }
+    { key: 'water', label: 'Wasser', unit: 'ml', dec: 0, def: 2500, grid: 'goal-grid' },
+    { key: 'glLow', label: 'GL pro Tag: niedrig bis', unit: 'GL', dec: 0, def: 80, grid: 'goal-grid-limits' },
+    { key: 'glMid', label: 'GL pro Tag: mittel bis', unit: 'GL', dec: 0, def: 120, grid: 'goal-grid-limits' },
+    { key: 'nakGood', label: 'Na:K gut ab', note: '1 : x', unit: 'x', dec: 1, def: 2, grid: 'goal-grid-limits' },
+    { key: 'nakMid', label: 'Na:K mittel ab', note: '1 : x', unit: 'x', dec: 1, def: 1, grid: 'goal-grid-limits' },
+    { key: 'caffeine', label: 'Koffein', note: 'Maximum pro Tag', unit: 'mg', dec: 0, def: 400, grid: 'goal-grid-caf' },
+    { key: 'cafCutoff', label: 'Kein Koffein nach', unit: 'Uhr', dec: 0, def: 15, grid: 'goal-grid-caf' },
+    { key: 'weight', label: 'Körpergewicht', unit: 'kg', dec: 1, def: 70, grid: 'goal-grid-caf' }
   ]);
   var themeDraft = 'dark';
   function systemTheme() {
@@ -21,7 +22,7 @@
   function renderThemeSeg() {
     var seg = $('theme-seg');
     seg.replaceChildren();
-    [['dark', 'Dunkel'], ['light', 'Hell'], ['system', 'System']].forEach(function (o) {
+    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'Automatisch']].forEach(function (o) {
       var b = el('button', null, o[1]);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(themeDraft === o[0]));
@@ -32,21 +33,24 @@
       seg.append(b);
     });
   }
+  /* One settings cell per goal: label left, value and unit right; an empty value means no goal */
   function buildGoalGrid() {
-    var grid = $('goal-grid');
-    grid.replaceChildren();
+    ['goal-grid', 'goal-grid-limits', 'goal-grid-caf'].forEach(function (id) { $(id).replaceChildren(); });
     GOAL_FIELDS.forEach(function (f) {
-      var wrap = el('div', 'goal');
-      var lab = el('label', null, f.label + ' (' + f.unit + ')');
-      lab.htmlFor = 'g-' + f.key;
-      var inp = el('input');
+      var cell = el('label', 'cell');
+      cell.htmlFor = 'g-' + f.key;
+      var lab = el('span', 'cell-l', f.label);
+      if (f.note) lab.append(el('small', null, f.note));
+      var inp = el('input', 'cell-in');
       inp.type = 'number';
       inp.id = 'g-' + f.key;
       inp.min = '0';
       inp.step = 'any';
       inp.inputMode = 'decimal';
-      wrap.append(lab, inp);
-      grid.append(wrap);
+      inp.placeholder = 'kein';
+      doneKey(inp);
+      cell.append(lab, inp, el('span', 'cell-u', f.unit));
+      $(f.grid).append(cell);
     });
   }
   function fillGoalInputs() {
@@ -120,23 +124,25 @@
     setBusy(false);
     return ok;
   }
+  /* Abbrechen, the scrim, Escape and pulling the sheet down all discard unsaved changes; Fertig saves */
+  var settingsSheet = sheetCtl($('settings'), {
+    keep: true,
+    onDismiss: function () {
+      $('open-settings').setAttribute('aria-expanded', 'false');
+      $('model-tier').value = MODEL_SAVED;
+      fillGoalInputs();
+    }
+  });
   function openSettings() {
     themeDraft = THEME;
     renderThemeSeg();
     $('model-tier').value = MODEL_SAVED;
     fillGoalInputs();
-    $('settings').hidden = false;
+    settingsSheet.body.scrollTop = 0;
+    settingsSheet.open();
     $('open-settings').setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-    $('save-goals').focus();
   }
-  function closeSettings() {
-    $('settings').hidden = true;
-    $('open-settings').setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-    $('model-tier').value = MODEL_SAVED;
-    fillGoalInputs();
-  }
+  function closeSettings() { settingsSheet.close('cancel'); }
   async function saveSettings() {
     if (dbRef) {
       var ok = await saveGoals();
@@ -159,14 +165,16 @@
   $('daylabel').addEventListener('click', function () { goTo(keyOf(new Date())); });
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.closest && e.target.closest('textarea,input,select')) return;
-    if (!$('settings').hidden) return;
+    if (SHEETS.length) return;
     if (e.key === 'ArrowLeft') goTo(addDays(viewKey, -1));
     else if (e.key === 'ArrowRight') goTo(addDays(viewKey, 1));
   });
+  /* Swipe between days: clearly horizontal (over 60 px and 1.6x the vertical movement), never from
+     fields, wide tables, the chart, history, the preview or an open sheet. A swipe also closes the keyboard. */
   var swipeX = null, swipeY = null;
   document.addEventListener('touchstart', function (e) {
     var tgt = e.target;
-    if (e.touches.length !== 1 || (tgt && tgt.closest && tgt.closest('textarea,input,select,.tbl-wrap,#chart,#history,.preview,.toast,#settings'))) { swipeX = null; return; }
+    if (e.touches.length !== 1 || SHEETS.length || (tgt && tgt.closest && tgt.closest('textarea,input,select,.tbl-wrap,#chart,#history,.preview,.toast,.sheet-back'))) { swipeX = null; return; }
     swipeX = e.touches[0].clientX;
     swipeY = e.touches[0].clientY;
   }, { passive: true });
@@ -175,13 +183,13 @@
     var t = e.changedTouches[0];
     var dx = t.clientX - swipeX, dy = t.clientY - swipeY;
     swipeX = null;
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    var f = document.activeElement;
+    if (f && f.matches && f.matches('input,textarea,select')) f.blur();
     goTo(addDays(viewKey, dx > 0 ? -1 : 1));
   }, { passive: true });
 
   renderThemeSeg();
   buildGoalGrid();
   $('open-settings').addEventListener('click', openSettings);
-  $('settings').addEventListener('click', function (e) { if (e.target === $('settings')) closeSettings(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('settings').hidden) closeSettings(); });
 

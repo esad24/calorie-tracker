@@ -35,55 +35,6 @@
     </div>
   </header>
 
-  <div class="modal-back" id="settings" hidden>
-    <div class="set-modal" role="dialog" aria-modal="true" aria-labelledby="h-set">
-      <div class="set-head"><h2 id="h-set">Einstellungen</h2></div>
-      <div class="set-body">
-        <fieldset class="set-group">
-          <legend class="set-sub">Darstellung</legend>
-          <div class="seg" id="theme-seg"></div>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Schätz-Modell</legend>
-          <select class="u-sel tier-sel" id="model-tier" aria-label="Modell für die Schätzung">
-            <option value="haiku">Haiku · schnell</option>
-            <option value="sonnet">Sonnet · ausgewogen</option>
-            <option value="opus">Opus · am genauesten</option>
-          </select>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Tagesziele und Grenzen</legend>
-          <div class="set-lh"><button type="button" class="info-btn" aria-label="Info anzeigen" aria-expanded="false">i</button><span class="hint">Was bedeuten die Werte?</span><p class="note info-text" hidden>Leer lassen, wenn du für einen Wert kein Ziel willst. Zucker und Salz sind Obergrenzen, die übrigen Werte Zielmengen. Bei der glykämischen Last (GL) bestimmst du die Tagesgrenzen für „niedrig“ und „mittel“; die Grenzen pro Mahlzeit sind ein Drittel davon. Koffein ist eine Obergrenze. Das Körpergewicht wird für die ADI-Anzeige der Süßungsmittel genutzt. Bei Na:K steht x für Kalium geteilt durch Natrium; ab dem „gut“-Wert gilt das Verhältnis als gut, ab dem „mittel“-Wert als mittel.</p></div>
-          <div class="goal-grid" id="goal-grid"></div>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Kalorien-Saldo</legend>
-          <div class="goal">
-            <label for="g-bal">Saldo zu Beginn von heute (kcal, minus = Defizit)</label>
-            <input type="number" id="g-bal" step="1" inputmode="numeric">
-          </div>
-          <p class="note">Wird ab heute weitergerechnet. 0 setzt den Saldo zurück.</p>
-        </fieldset>
-        <fieldset class="set-group" id="export-group">
-          <legend class="set-sub">Daten exportieren</legend>
-          <div class="row">
-            <button type="button" class="btn ghost" id="export-csv">Als CSV (Tabelle)</button>
-            <button type="button" class="btn ghost" id="export-json">Als JSON (Backup)</button>
-          </div>
-          <p class="note">CSV: eine Zeile pro Lebensmittel, für Excel oder Sheets. JSON: alle Tage, Ziele, Favoriten und gespeicherten Lebensmittel.</p>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Zugriff</legend>
-          <div><button type="button" class="btn ghost" id="manage-perms">Berechtigungen verwalten</button></div>
-        </fieldset>
-      </div>
-      <div class="set-foot">
-        <button type="button" class="btn" id="save-goals">Speichern</button>
-        <button type="button" class="btn ghost" id="close-settings">Schließen</button>
-      </div>
-    </div>
-  </div>
-
   <section class="composer" aria-labelledby="h-add">
     <h2 id="h-add">Mahlzeit hinzufügen</h2>
     <div class="info c"><button type="button" class="info-btn corner" aria-label="Info anzeigen" aria-expanded="false">i</button><p class="note info-text" hidden>Du kannst Mahlzeiten auch im Chat bei Claude eintragen.</p></div>
@@ -151,5 +102,68 @@
 
 </main>
 
-<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sheet-back" id="settings" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="h-set">
+    <div class="sheet-grab" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <button type="button" class="sheet-cancel" id="close-settings">Abbrechen</button>
+      <h2 class="sheet-title" id="h-set">Einstellungen</h2>
+      <button type="button" class="sheet-done" id="save-goals">Fertig</button>
+    </div>
+    <div class="sheet-body">
+      <section class="grp" aria-labelledby="gh-look">
+        <h3 class="grp-h" id="gh-look">Darstellung</h3>
+        <div class="grp-list"><div class="cell"><div class="ios-seg" id="theme-seg" role="group" aria-labelledby="gh-look"></div></div></div>
+      </section>
+      <section class="grp" aria-labelledby="gh-model">
+        <h3 class="grp-h" id="gh-model">Schätzung</h3>
+        <div class="grp-list">
+          <label class="cell" for="model-tier"><span class="cell-l">Modell</span>
+            <select id="model-tier">
+              <option value="haiku">Haiku · schnell</option>
+              <option value="sonnet">Sonnet · ausgewogen</option>
+              <option value="opus">Opus · am genauesten</option>
+            </select>
+          </label>
+        </div>
+      </section>
+      <section class="grp" aria-labelledby="gh-goals">
+        <h3 class="grp-h" id="gh-goals">Tagesziele</h3>
+        <div class="grp-list" id="goal-grid"></div>
+        <p class="grp-f">Leer lassen, wenn du für einen Wert kein Ziel willst. Zucker und Salz sind Obergrenzen, die übrigen Werte Zielmengen.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-limits">
+        <h3 class="grp-h" id="gh-limits">Grenzwerte</h3>
+        <div class="grp-list" id="goal-grid-limits"></div>
+        <p class="grp-f">Glykämische Last (GL): Tagesgrenzen für „niedrig“ und „mittel“; pro Mahlzeit gilt ein Drittel davon. Na:K: x steht für Kalium geteilt durch Natrium; ab dem „gut“-Wert gilt das Verhältnis als gut, ab dem „mittel“-Wert als mittel.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-caf">
+        <h3 class="grp-h" id="gh-caf">Koffein und Körper</h3>
+        <div class="grp-list" id="goal-grid-caf"></div>
+        <p class="grp-f">Koffein ist eine Obergrenze. Das Körpergewicht wird für die ADI-Anzeige der Süßungsmittel genutzt.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-bal">
+        <h3 class="grp-h" id="gh-bal">Kalorien-Saldo</h3>
+        <div class="grp-list">
+          <label class="cell" for="g-bal"><span class="cell-l">Saldo zu Beginn von heute</span><input class="cell-in" type="number" id="g-bal" step="1" inputmode="numeric"><span class="cell-u">kcal</span></label>
+        </div>
+        <p class="grp-f">Minus ist ein Defizit. Der Saldo wird ab heute weitergerechnet; 0 setzt ihn zurück.</p>
+      </section>
+      <section class="grp" id="export-group" aria-labelledby="gh-export">
+        <h3 class="grp-h" id="gh-export">Daten exportieren</h3>
+        <div class="grp-list">
+          <div class="cell"><button type="button" class="cell-btn" id="export-csv">Als CSV exportieren (Tabelle)</button></div>
+          <div class="cell"><button type="button" class="cell-btn" id="export-json">Als JSON exportieren (Backup)</button></div>
+        </div>
+        <p class="grp-f">CSV: eine Zeile pro Lebensmittel, für Excel oder Sheets. JSON: alle Tage, Ziele, Favoriten und gespeicherten Lebensmittel.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-access">
+        <h3 class="grp-h" id="gh-access">Zugriff</h3>
+        <div class="grp-list"><div class="cell"><button type="button" class="cell-btn" id="manage-perms">Berechtigungen verwalten</button></div></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span class="toast-msg" id="toast-msg"></span><button type="button" class="toast-act" id="toast-act" hidden></button></div>
 

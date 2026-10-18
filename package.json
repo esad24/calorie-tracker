@@ -1,0 +1,9 @@
+{
+  "name": "calorie-log",
+  "private": true,
+  "description": "Calorie Log artifact: source in src/, built into dist/app.html",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node build.js && node test/smoke.js"
+  }
+}

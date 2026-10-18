@@ -95,33 +95,56 @@
     $('logged').textContent = String(days.filter(function (dd) { return mealsOf(dd).length > 0; }).length);
   }
 
+  /* Earlier days: 60 at a time (more load as you scroll near the end). A day's tables are built only
+     when it is opened, so a long history costs a list of summaries, not hundreds of wide tables. */
+  var HIST_PAGE = 60, histLimit = HIST_PAGE, moreObserver = null;
   function renderHistory(today) {
     var box = $('history');
     if (lockMeals(true) && box.children.length) return;
     box.replaceChildren();
+    if (moreObserver) moreObserver.disconnect();
     var past = days
       .filter(function (d) { return d.date < today && mealsOf(d).length > 0; })
       .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     $('history-empty').hidden = status !== 'ready' || past.length > 0;
-    past.forEach(function (d) {
+    past.slice(0, histLimit).forEach(function (d) {
       var det = el('details', 'day');
-      if (openDays.has(d.date) || editDate() === d.date) det.open = true;
-      det.addEventListener('toggle', function () { if (det.open) openDays.add(d.date); else openDays.delete(d.date); });
+      var t = dayTotals(d);
+      var built = false;
+      function build() {
+        if (built) return;
+        built = true;
+        var body = el('div', 'day-body');
+        body.append(chips(t));
+        mealCards(d, d.date).forEach(function (c) { body.append(c); });
+        det.append(body);
+      }
+      det.addEventListener('toggle', function () {
+        if (det.open) { openDays.add(d.date); build(); } else openDays.delete(d.date);
+      });
       var sum = el('summary');
+      var diff = Math.round(t.kcal - TARGET);
       sum.append(
         el('span', 'd-date', fmtDate(d.date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })),
-        el('span', 'd-total', (function () {
-          var g = dayTotals(d).gl;
-          var diff = Math.round(totalOf(d) - TARGET);
-          return fmtN(totalOf(d)) + ' kcal (' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') + fmtN(Math.abs(diff)) + ')' +
-            (g != null ? ' · GL ' + fmtN(g) : '');
-        })())
+        el('span', 'd-total', fmtN(t.kcal) + ' kcal (' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') + fmtN(Math.abs(diff)) + ')' +
+          (t.gl != null ? ' · GL ' + fmtN(t.gl) : ''))
       );
-      var body = el('div', 'day-body');
-      body.append(chips(dayTotals(d)));
-      mealCards(d, d.date).forEach(function (c) { body.append(c); });
-      det.append(sum, body);
+      det.append(sum);
+      if (openDays.has(d.date) || editDate() === d.date) { det.open = true; build(); }
       box.append(det);
     });
+    if (past.length > histLimit) {
+      var more = el('button', 'more-btn', 'Weitere Tage anzeigen (' + histLimit + ' von ' + past.length + ')');
+      more.type = 'button';
+      more.addEventListener('click', function () { histLimit += HIST_PAGE; renderHistory(keyOf(new Date())); });
+      box.append(more);
+      if ('IntersectionObserver' in window) {
+        if (!moreObserver) moreObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) { moreObserver.unobserve(e.target); e.target.click(); } });
+        }, { rootMargin: '0px 0px 600px 0px' });
+        moreObserver.observe(more);
+      }
+    }
   }
+
 

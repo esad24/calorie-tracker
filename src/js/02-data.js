@@ -168,12 +168,31 @@
       var idx = locateMeal(data, meal);
       if (idx < 0) { toast('Der Eintrag hat sich geändert. Lade die Seite neu und versuche es erneut.'); return; }
       var next = data.meals.slice();
-      next.splice(idx, 1);
+      var removed = next.splice(idx, 1)[0];
       await ref.update({ meals: next });
-      toast('Eintrag entfernt.');
+      undoToast('Mahlzeit gelöscht.', function () { restoreMeal(date, removed, idx); });
       });
     } catch (e) {
-      toast('Der Eintrag konnte nicht entfernt werden.');
+      toast('Die Mahlzeit konnte nicht gelöscht werden.');
+    }
+  }
+  /* Undo of a deleted meal: put it back at its old place unless it is already there again */
+  async function restoreMeal(date, meal, idx) {
+    if (!dbRef) return;
+    try {
+      await dbTask(async function () {
+        var ref = dbRef.doc('days/' + date);
+        var snap = await ref.get();
+        var data = snap.exists ? snap.data() : null;
+        var meals = data && Array.isArray(data.meals) ? data.meals.slice() : [];
+        if (meal.id && meals.some(function (x) { return x && x.id === meal.id; })) return;
+        meals.splice(Math.min(idx, meals.length), 0, meal);
+        if (data) await ref.update({ meals: meals });
+        else await ref.set({ date: date, meals: meals });
+      });
+      toast('Mahlzeit wiederhergestellt.');
+    } catch (e) {
+      toast('Die Mahlzeit konnte nicht wiederhergestellt werden.');
     }
   }
 
@@ -197,18 +216,18 @@
   /* Eine Zutat im Entwurf ändern: transform bekommt die Zutat und liefert die neue oder einen Fehlertext. */
   function applyEdit(date, meal, part, transform) {
     var d = mealDraft;
-    if (!d) { render(true); return; }
+    if (!d) { afterTap(renderCommit); return; }
     var cur = d.parts[part._pi];
     if (!cur || cur.name !== part.name) {
       toast('Der Eintrag hat sich geändert. Lade die Seite neu und versuche es erneut.');
-      render(true);
+      afterTap(renderCommit);
       return;
     }
     var res = transform(cur);
-    if (res.error) { toast(res.error); render(true); return; }
+    if (res.error) { toast(res.error); afterTap(renderCommit); return; }
     if (res.remove) d.parts.splice(part._pi, 1); else d.parts[part._pi] = res.part;
     d.dirty = true;
-    render(true);
+    afterTap(renderCommit);
   }
 
   function commitQty(date, meal, part, old, raw) {

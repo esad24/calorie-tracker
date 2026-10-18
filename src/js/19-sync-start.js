@@ -24,7 +24,7 @@
       return dbRef.doc('settings/goals').onSnapshot(function (snap) {
         GOALS = snap.exists ? sanitizeGoals(snap.data()) : {};
         applyGoals();
-        if ($('settings').hidden) fillGoalInputs();
+        if (!settingsSheet.isOpen) fillGoalInputs();
         render();
       }, fail);
     });

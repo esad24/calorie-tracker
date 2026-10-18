@@ -1,7 +1,7 @@
   /* Wasser: Tagesmenge in ml im Tagesdokument (Feld water) */
   var waterBusy = false;
   function waterGoal() { return GOALS.water > 0 ? GOALS.water : 2500; }
-  function fmtL(ml) { return (ml / 1000).toLocaleString(LOCALE, { maximumFractionDigits: 2 }) + ' L'; }
+  function fmtL(ml) { return nf(2).format(ml / 1000) + ' L'; }
   async function addWater(date, delta) {
     if (!dbRef) return;
     try {

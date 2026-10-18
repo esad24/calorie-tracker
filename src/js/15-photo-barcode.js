@@ -25,16 +25,16 @@
   function askPhotoContext(file) {
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(file);
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'dialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', 'Foto auswerten');
-      m.append(el('h3', null, 'Foto auswerten'));
+      var result = null;
+      var sheet = makeSheet({
+        title: 'Foto auswerten', cancel: 'Abbrechen', done: 'Auswerten',
+        onDone: function () { result = ta.value.trim().slice(0, 500); sheet.close('done'); },
+        onDismiss: function () { URL.revokeObjectURL(url); resolve(result); }
+      });
       var img = el('img');
       img.src = url;
       img.alt = 'Aufgenommenes Foto';
-      img.style.cssText = 'width:100%;max-height:220px;object-fit:contain;border-radius:14px;background:var(--bg)';
+      img.style.cssText = 'width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--cell)';
       var lab = el('label', 'hint', 'Kontext (optional)');
       lab.htmlFor = 'photo-ctx';
       var ta = el('textarea');
@@ -42,24 +42,8 @@
       ta.rows = 3;
       ta.maxLength = 500;
       ta.placeholder = 'z. B. Portion halb gegessen, mit Olivenöl gebraten, Produktname …';
-      var row = el('div', 'ask-row');
-      var cancel = el('button', 'btn ghost', 'Abbrechen');
-      cancel.type = 'button';
-      var ok = el('button', 'btn', 'Auswerten');
-      ok.type = 'button';
-      cancel.style.flex = '1';
-      ok.style.flex = '1';
-      function onKey(e) { if (e.key === 'Escape') close(null); }
-      function close(v) { document.removeEventListener('keydown', onKey); URL.revokeObjectURL(url); back.remove(); resolve(v); }
-      cancel.addEventListener('click', function () { close(null); });
-      ok.addEventListener('click', function () { close(ta.value.trim().slice(0, 500)); });
-      back.addEventListener('click', function (e) { if (e.target === back) close(null); });
-      document.addEventListener('keydown', onKey);
-      row.append(cancel, ok);
-      m.append(img, lab, ta, row);
-      back.append(m);
-      document.body.append(back);
-      ta.focus();
+      sheet.body.append(img, lab, ta);
+      sheet.open();
     });
   }
   $('nut-file').addEventListener('change', async function () {

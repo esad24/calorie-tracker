@@ -19,10 +19,12 @@
 
   function showPreview(parts, note, name) {
     var box = $('preview');
+    var view = saveViewState();
     box.replaceChildren();
     if (name !== undefined) { previewName = cleanName(name); previewNameTouched = false; }
     var inputs = [];
     var wrap = el('div', 'tbl-wrap');
+    wrap.setAttribute('data-k', 'preview');
     var tbl = el('table', 'ntable');
     var body = document.createElement('tbody');
     var kcalSum = null;
@@ -33,7 +35,7 @@
     function updateTotal() { if (kcalSum) kcalSum.textContent = fmtN(sumKcal()); }
     function rebuild(skip) {
       parts.forEach(function (pp, n) { if (n !== skip && inputs[n]) pp.kcal = Math.max(0, Math.round(Number(inputs[n].value) || 0)); });
-      showPreview(parts, note);
+      afterTap(function () { showPreview(parts, note); });
     }
     function applyQty(p, i, q, unit) {
       var cur = Math.max(0, Math.round(Number(inputs[i].value) || 0));
@@ -149,7 +151,14 @@
       });
       var tdAct = el('td', 'act');
       var rdel = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      confirmTap(rdel, function () { removeRow(i); }, 'Lebensmittel entfernen?', String(p.name || ''));
+      rdel.addEventListener('click', function () {
+        var removed = p;
+        removeRow(i);
+        undoToast(String(removed.name || 'Lebensmittel') + ' entfernt.', function () {
+          parts.splice(Math.min(i, parts.length), 0, removed);
+          showPreview(parts, note);
+        });
+      });
       tdAct.append(rdel);
       tr.append(tdAct);
       body.append(tr);
@@ -210,6 +219,7 @@
     save.addEventListener('click', saveMeal);
     discard.addEventListener('click', function () { pending = null; box.hidden = true; box.replaceChildren(); setChangeMode(false, true); });
     setChangeMode(true);
+    restoreViewState(view);
   }
 
   var MODELS = {

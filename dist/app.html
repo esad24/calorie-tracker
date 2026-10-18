@@ -24,6 +24,39 @@
   --edge: rgba(255, 255, 255, 0.06);
   --good: #34D399;
   --warn: #F59E5B;
+  /* iOS system surfaces for sheets, settings and toasts */
+  --sheet-bg: #1C1C1E;
+  --cell: #2C2C2E;
+  --sep: rgba(84, 84, 88, 0.65);
+  --seg-bg: rgba(118, 118, 128, 0.24);
+  --seg-on: #636366;
+  --scrim: rgba(0, 0, 0, 0.5);
+  --toast-act: #2F5BE0;
+}
+/* Light tokens appear twice (system light and explicit light); keep both blocks in sync. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #F2F5FB;
+    --panel: #FFFFFF;
+    --tint: #EAF0FB;
+    --fg: #0E1830;
+    --muted: #5A6785;
+    --line: #D6DEEE;
+    --accent: #3F6BF2;
+    --accent-soft: #BFD0FA;
+    --over: #D40045;
+    --edge: rgba(14, 24, 48, 0.08);
+    --good: #0F9F6E;
+    --warn: #D9701A;
+    --sheet-bg: #F2F2F7;
+    --cell: #FFFFFF;
+    --sep: rgba(60, 60, 67, 0.29);
+    --seg-bg: rgba(118, 118, 128, 0.12);
+    --seg-on: #FFFFFF;
+    --scrim: rgba(0, 0, 0, 0.32);
+    --toast-act: #A9C0FF;
+  }
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -39,6 +72,13 @@
   --edge: rgba(14, 24, 48, 0.08);
   --good: #0F9F6E;
   --warn: #D9701A;
+  --sheet-bg: #F2F2F7;
+  --cell: #FFFFFF;
+  --sep: rgba(60, 60, 67, 0.29);
+  --seg-bg: rgba(118, 118, 128, 0.12);
+  --seg-on: #FFFFFF;
+  --scrim: rgba(0, 0, 0, 0.32);
+  --toast-act: #A9C0FF;
 }
 
 body {
@@ -244,16 +284,17 @@ h2 {
   cursor: pointer;
   flex: none;
 }
-.rm:focus-visible, .set-btn:focus-visible, .seg button:focus-visible, .goal input:focus-visible, .btn:focus-visible, textarea:focus-visible, .p-kcal:focus-visible, .q-in:focus-visible, .u-sel:focus-visible {
+.rm:focus-visible, .set-btn:focus-visible, .ios-seg button:focus-visible, .cell-btn:focus-visible, .sheet-cancel:focus-visible, .sheet-done:focus-visible, .toast-act:focus-visible, .more-btn:focus-visible, .goal input:focus-visible, .btn:focus-visible, textarea:focus-visible, .p-kcal:focus-visible, .q-in:focus-visible, .u-sel:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* The only horizontal scroller per table; the page scrolls vertically, never both in one element */
+.tbl-wrap { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .ntable {
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
-  min-width: 1110px;
+  min-width: 1158px;
   font-size: 14px;
 }
 .ntable th, .ntable td {
@@ -382,15 +423,7 @@ textarea {
 .mic.on { background: var(--over); border-color: var(--over); color: #FFFFFF; }
 .mic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Popup für Rückfragen */
-.modal-back { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
-.modal { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; max-width: 480px; width: 100%; max-height: 80vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
-.modal h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 18px; font-weight: 700; }
 /* Vergangene Lebensmittel / Favoriten */
-.pick-modal { max-width: 560px; gap: 8px; }
-.pick-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pick-head h3 { margin: 0; }
-.pick-x { font: inherit; font-size: 22px; line-height: 1; width: 40px; height: 40px; flex: none; border-radius: 20px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
 .pick-search { font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--fg); }
 .pick-list { display: flex; flex-direction: column; gap: 6px; }
 .pick-row { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); }
@@ -401,12 +434,8 @@ textarea {
 .pick-btn.add { background: var(--accent); border-color: var(--accent); color: #FFFFFF; font-size: 24px; }
 .pick-btn.star.on { color: #F5B731; border-color: rgba(245, 183, 49, 0.5); }
 .pick-btn[disabled] { opacity: 0.5; cursor: default; }
-.pick-btn:focus-visible, .pick-x:focus-visible, .pick-search:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pick-btn:focus-visible, .pick-search:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pick-for { margin: 0; font-size: 13px; color: var(--muted); }
-.opt { font: inherit; font-size: 14px; text-align: left; padding: 11px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
-.opt b { font-family: var(--font-mono); color: var(--accent); margin-right: 4px; }
-.opt.ghost { background: transparent; color: var(--muted); }
-.opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ask-row { display: flex; gap: 8px; margin-top: 4px; }
 .ask-row input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--fg); }
 .ask-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -503,36 +532,8 @@ textarea {
 }
 .gear-btn { width: 44px; height: 44px; flex: none; padding: 0; border-radius: 22px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .gear-btn svg { width: 22px; height: 22px; display: block; }
-.gear-btn:hover { color: var(--fg); }
+@media (hover: hover) { .gear-btn:hover { color: var(--fg); } }
 .gear-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.set-modal { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 24px; width: 100%; max-width: 560px; max-height: min(88vh, 860px); display: flex; flex-direction: column; overflow: hidden; }
-.set-head { padding: 18px 20px 8px; }
-.set-head h2 { margin: 0; }
-.set-body { padding: 8px 20px 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 22px; min-height: 0; }
-.set-foot { display: flex; gap: 10px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--panel); }
-.set-foot .btn { flex: 1 1 0; background: var(--tint); border-color: var(--line); color: var(--fg); }
-.set-foot .btn.ghost { background: transparent; }
-.set-modal .seg button[aria-pressed="true"] { background: var(--line); border-color: var(--muted); color: var(--fg); }
-.set-modal .tier-sel { width: 100%; min-width: 0; flex: none; }
-.set-lh { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.set-lh .info-text { flex: 1 1 100%; }
-.set-sub { margin: 4px 0 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.set-group { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.set-group legend { padding: 0; margin-bottom: 6px; font-weight: 600; }
-.seg { display: flex; gap: 6px; flex-wrap: wrap; }
-.seg button {
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 9px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  color: var(--fg);
-  cursor: pointer;
-}
-.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
-.goal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .goal { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .goal label { font-size: 13px; color: var(--muted); }
 .goal input {
@@ -579,16 +580,33 @@ textarea {
 .chip-fill { height: 100%; border-radius: 2px; background: var(--accent); }
 .chip-fill.over { background: var(--over); }
 
+/* Floating toast above the home indicator; an optional action (Undo) sits on the right */
 .toast {
-  z-index: 60;
+  z-index: 70;
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  left: 50%;
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), 20px) + 8px);
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 520px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 14px;
   background: var(--fg);
   color: var(--bg);
-  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.3;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+.toast-msg { flex: 1; min-width: 0; padding: 6px 0; }
+.toast-act { flex: none; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: var(--toast-act); font: inherit; font-weight: 600; cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast:not([hidden]) { animation: toast-in 0.24s cubic-bezier(.2, .9, .25, 1); }
+  @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 12px); } }
 }
 .empty {
   margin: 0;
@@ -701,19 +719,150 @@ textarea {
 .pick-tools { display: flex; gap: 8px; flex-wrap: wrap; }
 .pick-tools .pick-search { flex: 1 1 160px; min-width: 0; }
 .pick-tools .u-sel { width: auto; flex: 0 0 auto; padding: 8px 10px; border-radius: 14px; font-size: 14px; }
-.pick-tools .seg { flex: 1 1 100%; }
-.pick-tools .seg button { padding: 6px 12px; font-size: 13px; }
 .pick-por { display: flex; align-items: center; gap: 4px; flex: none; }
 .pick-por .q-in { width: 64px; padding: 8px 6px; font-size: 14px; }
 .pick-por span { font-size: 12px; color: var(--muted); }
 .pick-row.food { flex-wrap: wrap; }
-.pick-foot { position: sticky; bottom: -20px; margin: 4px -20px -20px; padding: 12px 20px; display: flex; align-items: center; gap: 10px; background: var(--panel); border-top: 1px solid var(--line); }
 .pick-foot .pick-sum { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .pick-type { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 @media (max-width: 480px) {
   .pick-row.food .pick-txt { flex: 1 1 100%; }
   .pick-row.food .pick-por { margin-right: auto; }
 }
+/* iOS layer: 16px fields, touch feedback, bottom sheets, inset grouped lists, lazy history paint */
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+button, label.btn, summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* Safari zooms the page into any field under 16px, so every field is at least 16px */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { font-size: 16px !important; }
+.q-in { width: 64px; }
+.mc-left .mc-dt { padding: 4px 8px; }
+
+/* Touch feedback; hover only where a real pointer hovers */
+.btn, .icon-btn, .nav-btn, .set-btn, .gear-btn, .pick-btn, .split button, .info-btn, .cell-btn, .sheet-cancel, .sheet-done, .toast-act, .more-btn {
+  transition: opacity 0.12s, background-color 0.15s;
+}
+.btn:active, .icon-btn:active, .nav-btn:active, .set-btn:active, .gear-btn:active, .pick-btn:active,
+.split button:active, .info-btn:active, .cell-btn:active, .sheet-cancel:active, .sheet-done:active, .toast-act:active, .more-btn:active { opacity: 0.55; }
+
+/* History: off-screen days skip layout and paint */
+.day { content-visibility: auto; contain-intrinsic-size: auto 52px; }
+.more-btn { align-self: center; margin-top: 14px; min-height: 44px; padding: 0 20px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+#history { display: flex; flex-direction: column; }
+
+/* Bottom sheet: scrim < sheet < toast */
+.sheet-back {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: transparent;
+  transition: background-color 0.32s;
+}
+.sheet-back.open { background: var(--scrim); }
+.sheet {
+  --kb: 0px;
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100% - max(env(safe-area-inset-top, 0px), 10px) - 34px);
+  display: flex;
+  flex-direction: column;
+  background: var(--sheet-bg);
+  color: var(--fg);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.22);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(.2, .9, .25, 1);
+  will-change: transform;
+}
+.sheet-back.open .sheet { transform: none; }
+.sheet.dragging { transition: none; }
+/* While typing, the sheet takes nearly the full height so the field stays above the keyboard */
+.sheet.typing { height: calc(100% - max(env(safe-area-inset-top, 0px), 10px) - 34px); }
+.sheet-grab { flex: none; height: 14px; display: flex; justify-content: center; align-items: flex-end; touch-action: none; cursor: grab; }
+.sheet-grab::before { content: ''; width: 36px; height: 5px; border-radius: 3px; background: var(--sep); }
+.sheet-head {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(64px, 1fr) minmax(0, auto) minmax(64px, 1fr);
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 2px 8px 6px;
+  touch-action: none;
+}
+.sheet-title { margin: 0; font-size: 17px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-cancel, .sheet-done { min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 17px; cursor: pointer; }
+.sheet-cancel { justify-self: start; }
+.sheet-done { justify-self: end; font-weight: 600; }
+.sheet-done[disabled] { opacity: 0.4; }
+.sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+}
+/* Safari drops bottom padding in scrolling flex boxes; a spacer child keeps the last row clear of the edge and keyboard */
+.sheet-body::after { content: ''; flex: none; height: calc(max(env(safe-area-inset-bottom, 0px), 20px) + var(--kb)); }
+.sheet-foot { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(max(env(safe-area-inset-bottom, 0px), 16px) + var(--kb)) max(16px, env(safe-area-inset-left, 0px)); border-top: 0.5px solid var(--sep); background: var(--sheet-bg); }
+.sheet:has(.sheet-foot) .sheet-body::after { height: 12px; }
+.sheet .note, .sheet .hint { color: var(--muted); }
+.sheet textarea, .sheet .pick-search, .sheet .ask-row input { background: var(--cell); border-color: transparent; border-radius: 10px; }
+@media (min-width: 700px) {
+  .sheet-back { align-items: center; padding: 24px; }
+  .sheet { border-radius: 14px; max-height: min(86vh, 860px); transform: translateY(16px) scale(0.98); opacity: 0; transition: transform 0.24s cubic-bezier(.2, .9, .25, 1), opacity 0.2s; }
+  .sheet-back.open .sheet { opacity: 1; }
+  .sheet-grab { visibility: hidden; height: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .sheet-back { transition-duration: 0.01s; }
+}
+
+/* Inset grouped list (Settings, choices) */
+.grp { display: flex; flex-direction: column; gap: 6px; }
+.grp-h { margin: 8px 16px 0; font-size: 13px; font-weight: 400; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+.grp-f { margin: 0 16px; font-size: 13px; line-height: 1.35; color: var(--muted); }
+.grp-list { background: var(--cell); border-radius: 12px; overflow: hidden; }
+.cell { position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 16px; box-sizing: border-box; }
+.cell + .cell::before { content: ''; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--sep); }
+.cell-l { flex: 1; min-width: 0; font-size: 16px; line-height: 1.25; }
+.cell-l small { display: block; font-size: 13px; color: var(--muted); }
+.cell-in { width: 6.5em; min-width: 0; padding: 8px 0; border: 0; background: transparent; color: var(--fg); font-family: inherit; text-align: right; font-variant-numeric: tabular-nums; }
+.cell-in::placeholder { color: var(--muted); opacity: 0.7; }
+.cell-in:focus { outline: none; }
+.cell-u { flex: none; min-width: 2.4em; color: var(--muted); font-size: 15px; }
+.cell select { max-width: 60%; padding: 8px 4px; border: 0; background: transparent; color: var(--muted); font-family: inherit; text-align: right; text-align-last: right; }
+.cell-btn { width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 16px; text-align: left; cursor: pointer; }
+.cell-btn.danger { color: var(--over); }
+.cell .ico { flex: none; width: 29px; height: 29px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 15px; font-weight: 700; }
+.cell:has(.ico) + .cell::before { left: 57px; }
+.ios-seg { display: flex; width: 100%; padding: 2px; border-radius: 9px; background: var(--seg-bg); box-sizing: border-box; }
+.ios-seg button { flex: 1 1 0; min-height: 32px; border: 0; border-radius: 7px; background: transparent; color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.ios-seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
+
+/* Choice sheet (questions during estimation) */
+.choice-list .cell-btn { color: var(--fg); display: flex; align-items: center; gap: 10px; padding: 10px 16px; line-height: 1.3; }
+.choice-list .cell-btn b { flex: none; width: 22px; color: var(--accent); font-weight: 600; }
+.sheet .ask-row .btn { flex: none; }
+.pick-foot { flex: 1; display: flex; align-items: center; gap: 10px; }
+.cell:has(> .cell-btn) { padding: 0; }
+.choice-q { margin: 2px 4px 0; font-size: 17px; font-weight: 600; line-height: 1.35; }
+.pick-sheet .pick-tools .ios-seg { flex: 1 1 100%; }
+.pick-sheet .pick-row { background: var(--cell); border-color: transparent; }
+.sheet .sheet-title, .sheet .choice-q { font-family: inherit; letter-spacing: -0.01em; }
+.sheet .pick-tools .u-sel { background: var(--cell); border-color: transparent; border-radius: 10px; }
 </style>
 
 <main class="page">
@@ -751,55 +900,6 @@ textarea {
       <dl class="hero-stats" id="hero-stats"></dl>
     </div>
   </header>
-
-  <div class="modal-back" id="settings" hidden>
-    <div class="set-modal" role="dialog" aria-modal="true" aria-labelledby="h-set">
-      <div class="set-head"><h2 id="h-set">Einstellungen</h2></div>
-      <div class="set-body">
-        <fieldset class="set-group">
-          <legend class="set-sub">Darstellung</legend>
-          <div class="seg" id="theme-seg"></div>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Schätz-Modell</legend>
-          <select class="u-sel tier-sel" id="model-tier" aria-label="Modell für die Schätzung">
-            <option value="haiku">Haiku · schnell</option>
-            <option value="sonnet">Sonnet · ausgewogen</option>
-            <option value="opus">Opus · am genauesten</option>
-          </select>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Tagesziele und Grenzen</legend>
-          <div class="set-lh"><button type="button" class="info-btn" aria-label="Info anzeigen" aria-expanded="false">i</button><span class="hint">Was bedeuten die Werte?</span><p class="note info-text" hidden>Leer lassen, wenn du für einen Wert kein Ziel willst. Zucker und Salz sind Obergrenzen, die übrigen Werte Zielmengen. Bei der glykämischen Last (GL) bestimmst du die Tagesgrenzen für „niedrig“ und „mittel“; die Grenzen pro Mahlzeit sind ein Drittel davon. Koffein ist eine Obergrenze. Das Körpergewicht wird für die ADI-Anzeige der Süßungsmittel genutzt. Bei Na:K steht x für Kalium geteilt durch Natrium; ab dem „gut“-Wert gilt das Verhältnis als gut, ab dem „mittel“-Wert als mittel.</p></div>
-          <div class="goal-grid" id="goal-grid"></div>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Kalorien-Saldo</legend>
-          <div class="goal">
-            <label for="g-bal">Saldo zu Beginn von heute (kcal, minus = Defizit)</label>
-            <input type="number" id="g-bal" step="1" inputmode="numeric">
-          </div>
-          <p class="note">Wird ab heute weitergerechnet. 0 setzt den Saldo zurück.</p>
-        </fieldset>
-        <fieldset class="set-group" id="export-group">
-          <legend class="set-sub">Daten exportieren</legend>
-          <div class="row">
-            <button type="button" class="btn ghost" id="export-csv">Als CSV (Tabelle)</button>
-            <button type="button" class="btn ghost" id="export-json">Als JSON (Backup)</button>
-          </div>
-          <p class="note">CSV: eine Zeile pro Lebensmittel, für Excel oder Sheets. JSON: alle Tage, Ziele, Favoriten und gespeicherten Lebensmittel.</p>
-        </fieldset>
-        <fieldset class="set-group">
-          <legend class="set-sub">Zugriff</legend>
-          <div><button type="button" class="btn ghost" id="manage-perms">Berechtigungen verwalten</button></div>
-        </fieldset>
-      </div>
-      <div class="set-foot">
-        <button type="button" class="btn" id="save-goals">Speichern</button>
-        <button type="button" class="btn ghost" id="close-settings">Schließen</button>
-      </div>
-    </div>
-  </div>
 
   <section class="composer" aria-labelledby="h-add">
     <h2 id="h-add">Mahlzeit hinzufügen</h2>
@@ -868,7 +968,70 @@ textarea {
 
 </main>
 
-<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sheet-back" id="settings" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="h-set">
+    <div class="sheet-grab" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <button type="button" class="sheet-cancel" id="close-settings">Abbrechen</button>
+      <h2 class="sheet-title" id="h-set">Einstellungen</h2>
+      <button type="button" class="sheet-done" id="save-goals">Fertig</button>
+    </div>
+    <div class="sheet-body">
+      <section class="grp" aria-labelledby="gh-look">
+        <h3 class="grp-h" id="gh-look">Darstellung</h3>
+        <div class="grp-list"><div class="cell"><div class="ios-seg" id="theme-seg" role="group" aria-labelledby="gh-look"></div></div></div>
+      </section>
+      <section class="grp" aria-labelledby="gh-model">
+        <h3 class="grp-h" id="gh-model">Schätzung</h3>
+        <div class="grp-list">
+          <label class="cell" for="model-tier"><span class="cell-l">Modell</span>
+            <select id="model-tier">
+              <option value="haiku">Haiku · schnell</option>
+              <option value="sonnet">Sonnet · ausgewogen</option>
+              <option value="opus">Opus · am genauesten</option>
+            </select>
+          </label>
+        </div>
+      </section>
+      <section class="grp" aria-labelledby="gh-goals">
+        <h3 class="grp-h" id="gh-goals">Tagesziele</h3>
+        <div class="grp-list" id="goal-grid"></div>
+        <p class="grp-f">Leer lassen, wenn du für einen Wert kein Ziel willst. Zucker und Salz sind Obergrenzen, die übrigen Werte Zielmengen.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-limits">
+        <h3 class="grp-h" id="gh-limits">Grenzwerte</h3>
+        <div class="grp-list" id="goal-grid-limits"></div>
+        <p class="grp-f">Glykämische Last (GL): Tagesgrenzen für „niedrig“ und „mittel“; pro Mahlzeit gilt ein Drittel davon. Na:K: x steht für Kalium geteilt durch Natrium; ab dem „gut“-Wert gilt das Verhältnis als gut, ab dem „mittel“-Wert als mittel.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-caf">
+        <h3 class="grp-h" id="gh-caf">Koffein und Körper</h3>
+        <div class="grp-list" id="goal-grid-caf"></div>
+        <p class="grp-f">Koffein ist eine Obergrenze. Das Körpergewicht wird für die ADI-Anzeige der Süßungsmittel genutzt.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-bal">
+        <h3 class="grp-h" id="gh-bal">Kalorien-Saldo</h3>
+        <div class="grp-list">
+          <label class="cell" for="g-bal"><span class="cell-l">Saldo zu Beginn von heute</span><input class="cell-in" type="number" id="g-bal" step="1" inputmode="numeric"><span class="cell-u">kcal</span></label>
+        </div>
+        <p class="grp-f">Minus ist ein Defizit. Der Saldo wird ab heute weitergerechnet; 0 setzt ihn zurück.</p>
+      </section>
+      <section class="grp" id="export-group" aria-labelledby="gh-export">
+        <h3 class="grp-h" id="gh-export">Daten exportieren</h3>
+        <div class="grp-list">
+          <div class="cell"><button type="button" class="cell-btn" id="export-csv">Als CSV exportieren (Tabelle)</button></div>
+          <div class="cell"><button type="button" class="cell-btn" id="export-json">Als JSON exportieren (Backup)</button></div>
+        </div>
+        <p class="grp-f">CSV: eine Zeile pro Lebensmittel, für Excel oder Sheets. JSON: alle Tage, Ziele, Favoriten und gespeicherten Lebensmittel.</p>
+      </section>
+      <section class="grp" aria-labelledby="gh-access">
+        <h3 class="grp-h" id="gh-access">Zugriff</h3>
+        <div class="grp-list"><div class="cell"><button type="button" class="cell-btn" id="manage-perms">Berechtigungen verwalten</button></div></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span class="toast-msg" id="toast-msg"></span><button type="button" class="toast-act" id="toast-act" hidden></button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
@@ -887,18 +1050,18 @@ textarea {
     { key: 'potassium', label: 'Kalium', unit: 'mg', dec: 0 }
   ];
   var COLS = [
-    { key: 'kcal', label: 'kcal', unit: '', w: 68, dec: 0 },
-    { key: 'protein', label: 'Protein', unit: 'g', w: 74, dec: 1 },
-    { key: 'carbs', label: 'Kohlenh.', unit: 'g', w: 80, dec: 1 },
-    { key: 'fat', label: 'Fett', unit: 'g', w: 68, dec: 1 },
-    { key: 'sugar', label: 'Zucker', unit: 'g', w: 74, dec: 1 },
-    { key: 'salt', label: 'Salz', unit: 'g', w: 68, dec: 1 },
-    { key: 'potassium', label: 'Kalium', unit: 'mg', w: 78, dec: 0 },
-    { key: 'gi', label: 'GI', unit: '', w: 62, dec: 0, calc: true },
-    { key: 'gl', label: 'GL', unit: 'Portion', w: 62, dec: 0, calc: true },
-    { key: 'nak', label: 'Na:K', unit: 'mg', w: 86, dec: 1, calc: true }
+    { key: 'kcal', label: 'kcal', unit: '', w: 74, dec: 0 },
+    { key: 'protein', label: 'Protein', unit: 'g', w: 80, dec: 1 },
+    { key: 'carbs', label: 'Kohlenh.', unit: 'g', w: 86, dec: 1 },
+    { key: 'fat', label: 'Fett', unit: 'g', w: 74, dec: 1 },
+    { key: 'sugar', label: 'Zucker', unit: 'g', w: 80, dec: 1 },
+    { key: 'salt', label: 'Salz', unit: 'g', w: 74, dec: 1 },
+    { key: 'potassium', label: 'Kalium', unit: 'mg', w: 84, dec: 0 },
+    { key: 'gi', label: 'GI', unit: '', w: 68, dec: 0, calc: true },
+    { key: 'gl', label: 'GL', unit: 'Portion', w: 68, dec: 0, calc: true },
+    { key: 'nak', label: 'Na:K', unit: 'mg', w: 92, dec: 1, calc: true }
   ];
-  var NAME_W = 150, QTY_W = 72, UNIT_W = 96, ACT_W = 48;
+  var NAME_W = 150, QTY_W = 80, UNIT_W = 100, ACT_W = 48; // sum 1158 = .ntable min-width
   var ICONS = {
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg>',
@@ -925,8 +1088,23 @@ textarea {
       pr.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
     });
   }
+  /* A transient refusal (unavailable, rate budget) is retried up to 3 times with growing pauses; the task
+     re-reads before it writes, so a retry is safe. A timeout is not retried: the write may have landed. */
+  function dbAttempt(fn, n) {
+    return withTimeout(Promise.resolve().then(fn), 20000).catch(function (e) {
+      var code = e && e.code;
+      if (n < 3 && (code === 'unavailable' || code === 'resource_exhausted')) {
+        return new Promise(function (r) { setTimeout(r, 400 * Math.pow(2, n)); }).then(function () { return dbAttempt(fn, n + 1); });
+      }
+      if (code === 'quota_exceeded') {
+        // after the caller's own error message, say what actually happened
+        setTimeout(function () { toast('Der Speicher ist voll. Exportiere deine Daten in den Einstellungen und lösche alte Einträge.', true); }, 0);
+      }
+      throw e;
+    });
+  }
   function dbTask(fn) {
-    var run = writeChain.then(function () { return withTimeout(Promise.resolve().then(fn), 20000); });
+    var run = writeChain.then(function () { return dbAttempt(fn, 0); });
     writeChain = run.catch(function () {});
     return run;
   }
@@ -958,8 +1136,11 @@ textarea {
   function parseKey(k) { var p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
   function addDays(k, n) { var d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); }
   function dayDiff(a, b) { return Math.round((parseKey(a) - parseKey(b)) / 86400000); }
-  function fmtN(n) { return Math.round(n).toLocaleString(LOCALE); }
-  function fmtD(n) { return n.toLocaleString(LOCALE, { maximumFractionDigits: 1 }); }
+  /* Intl formatters are expensive to create, so each one is built once and reused */
+  var NUM_FMT = {}, DATE_FMT = {}, DATE_TXT = new Map();
+  function nf(maxDec) { return NUM_FMT[maxDec] || (NUM_FMT[maxDec] = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: maxDec })); }
+  function fmtN(n) { return nf(0).format(Math.round(n)); }
+  function fmtD(n) { return nf(1).format(n); }
   function fmtNut(n, v) { return n.dec === 0 ? fmtN(v) : fmtD(v); }
   function fmtCol(c, v) { return c.key === 'nak' ? fmtNaK(v) : c.dec === 0 ? fmtN(v) : fmtD(v); }
   // Na:K als „1 : x“ – x = Kalium(mg) / Natrium(mg), Natrium = Salz(g) × 400
@@ -972,9 +1153,18 @@ textarea {
   var NAK = { good: 2, mid: 1 };
   function rateNaK(x) { return x >= NAK.good ? { k: 'low', label: 'gut' } : x >= NAK.mid ? { k: 'mid', label: 'mittel' } : { k: 'high', label: 'ungünstig' }; }
   function cellVal(c, v) { return v == null || isNaN(Number(v)) ? '–' : fmtCol(c, Number(v)); }
-  function fmtQty(q) { return q.toLocaleString(LOCALE, { maximumFractionDigits: 2 }); }
+  function fmtQty(q) { return nf(2).format(q); }
   function round2(v) { return Math.round(v * 100) / 100; }
-  function fmtDate(k, opts) { return parseKey(k).toLocaleDateString(LOCALE, opts); }
+  function fmtDate(k, opts) {
+    var ok = JSON.stringify(opts || {}), memo = k + '|' + ok;
+    var t = DATE_TXT.get(memo);
+    if (t === undefined) {
+      var f = DATE_FMT[ok] || (DATE_FMT[ok] = new Intl.DateTimeFormat(LOCALE, opts));
+      t = f.format(parseKey(k));
+      DATE_TXT.set(memo, t);
+    }
+    return t;
+  }
   function relLabel(k, today) {
     var n = dayDiff(today, k);
     return n <= 0 ? 'Heute' : n === 1 ? 'Gestern' : n === 2 ? 'Vorgestern' : 'Vor ' + n + ' Tagen';
@@ -993,19 +1183,188 @@ textarea {
     for (var k in attrs) e.setAttribute(k, attrs[k]);
     return e;
   }
-  function toast(text, sticky) {
-    var t = $('toast');
+  /* action: optional { label, run } shown as a button on the right (Undo) */
+  var toastAction = null;
+  function toast(text, sticky, action) {
+    var t = $('toast'), act = $('toast-act');
     clearTimeout(toastTimer);
+    toastAction = null;
     if (!text) { t.hidden = true; return; }
-    t.textContent = text;
+    $('toast-msg').textContent = text;
+    act.hidden = !action;
+    if (action) { act.textContent = action.label; toastAction = action.run; }
     t.hidden = false;
-    if (!sticky) toastTimer = setTimeout(function () { t.hidden = true; }, 4500);
+    if (!sticky) toastTimer = setTimeout(function () { t.hidden = true; toastAction = null; }, action ? 6000 : 4500);
   }
+  /* Destructive actions happen at once and offer Undo instead of asking first */
+  function undoToast(text, run) { toast(text, false, { label: 'Rückgängig', run: run }); }
+  $('toast-act').addEventListener('click', function () {
+    var run = toastAction;
+    toast('');
+    if (run) run();
+  });
   function num(v, dec) {
     var n = Math.max(0, Number(v) || 0);
     var f = Math.pow(10, dec);
     return Math.round(n * f) / f;
   }
+
+  /* Bottom sheets (iOS style): grabber, Cancel | Title | Done bar, slide in and out, pull down to close.
+     sheetCtl wires an existing .sheet-back (Settings); makeSheet builds one for pickers and questions. */
+  var SHEETS = []; // open sheets, topmost last
+  var sheetSeq = 0;
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function syncScrollLock() { document.body.style.overflow = SHEETS.length ? 'hidden' : ''; }
+
+  /* o: { keep: true to hide instead of remove on close, onDismiss(reason) once per close ('done' or 'cancel') } */
+  function sheetCtl(back, o) {
+    o = o || {};
+    var sh = back.querySelector('.sheet');
+    var ctl = { isOpen: false, back: back, sheet: sh, body: sh.querySelector('.sheet-body'), onDismiss: o.onDismiss };
+    var opener = null, hideTimer = null;
+    ctl.open = function () {
+      if (ctl.isOpen) return;
+      ctl.isOpen = true;
+      opener = document.activeElement;
+      clearTimeout(hideTimer);
+      back.hidden = false;
+      sh.classList.remove('dragging');
+      sh.style.transform = '';
+      void back.offsetHeight; // start the slide-in from the closed position
+      back.classList.add('open');
+      SHEETS.push(ctl);
+      syncScrollLock();
+      updateKeyboard();
+    };
+    ctl.close = function (reason) {
+      if (!ctl.isOpen) return;
+      ctl.isOpen = false;
+      SHEETS = SHEETS.filter(function (s) { return s !== ctl; });
+      var f = document.activeElement;
+      if (f && sh.contains(f)) f.blur();
+      sh.classList.remove('dragging', 'typing');
+      sh.style.transform = '';
+      sh.style.setProperty('--kb', '0px');
+      back.classList.remove('open');
+      hideTimer = setTimeout(function () { if (o.keep) back.hidden = true; else back.remove(); }, REDUCED ? 30 : 340);
+      syncScrollLock();
+      // Return focus for keyboard users; never to a text field, which would pop the iOS keyboard
+      if (opener && opener.focus && document.contains(opener) && !opener.matches('input,textarea,select')) {
+        try { opener.focus({ preventScroll: true }); } catch (e) {}
+      }
+      if (ctl.onDismiss) ctl.onDismiss(reason || 'cancel');
+    };
+    back.addEventListener('click', function (e) { if (e.target === back) ctl.close('cancel'); });
+    attachPull(ctl);
+    return ctl;
+  }
+
+  /* o: { title, cancel, done (button labels or null), role, cls, onDone, onDismiss } */
+  function makeSheet(o) {
+    var back = el('div', 'sheet-back');
+    var sh = el('div', 'sheet' + (o.cls ? ' ' + o.cls : ''));
+    sh.setAttribute('role', o.role || 'dialog');
+    sh.setAttribute('aria-modal', 'true');
+    var grab = el('div', 'sheet-grab');
+    grab.setAttribute('aria-hidden', 'true');
+    var head = el('div', 'sheet-head');
+    var cancel = o.cancel ? el('button', 'sheet-cancel', o.cancel) : el('span');
+    var title = el('h2', 'sheet-title', o.title || '');
+    title.id = 'sheet-title-' + (++sheetSeq);
+    sh.setAttribute('aria-labelledby', title.id);
+    var done = o.done ? el('button', 'sheet-done', o.done) : el('span');
+    if (o.cancel) cancel.type = 'button';
+    if (o.done) done.type = 'button';
+    head.append(cancel, title, done);
+    var body = el('div', 'sheet-body');
+    sh.append(grab, head, body);
+    back.append(sh);
+    back.hidden = true;
+    document.body.append(back);
+    var ctl = sheetCtl(back, { onDismiss: o.onDismiss });
+    if (o.cancel) cancel.addEventListener('click', function () { ctl.close('cancel'); });
+    if (o.done) done.addEventListener('click', function () { if (o.onDone) o.onDone(); else ctl.close('done'); });
+    ctl.title = title;
+    ctl.doneBtn = o.done ? done : null;
+    ctl.cancelBtn = o.cancel ? cancel : null;
+    ctl.addFoot = function () { var f = el('div', 'sheet-foot'); sh.append(f); return f; };
+    return ctl;
+  }
+
+  /* Pull down to close: from the grabber or title bar at once, from the content only when it is scrolled to the top.
+     The first pull with the keyboard up only dismisses the keyboard. */
+  function attachPull(ctl) {
+    var sh = ctl.sheet;
+    var y0 = null, x0 = 0, dy = 0, t0 = 0, decided = false, claimed = false, fromHead = false;
+    sh.addEventListener('touchstart', function (e) {
+      y0 = null;
+      if (e.touches.length !== 1 || !ctl.isOpen) return;
+      var t = e.target;
+      fromHead = !!(t.closest && t.closest('.sheet-grab,.sheet-head'));
+      if (!fromHead && t.closest && t.closest('input,textarea,select,.tbl-wrap,.ios-seg,.pick-por')) return;
+      y0 = e.touches[0].clientY;
+      x0 = e.touches[0].clientX;
+      dy = 0;
+      t0 = Date.now();
+      decided = false;
+      claimed = false;
+    }, { passive: true });
+    sh.addEventListener('touchmove', function (e) {
+      if (y0 == null) return;
+      var y = e.touches[0].clientY, x = e.touches[0].clientX;
+      dy = y - y0;
+      if (!decided) {
+        if (Math.abs(dy) < 8 && Math.abs(x - x0) < 8) return;
+        decided = true;
+        var body = sh.querySelector('.sheet-body');
+        claimed = dy > 0 && Math.abs(dy) > Math.abs(x - x0) * 1.5 && (fromHead || !body || body.scrollTop <= 0);
+        if (!claimed) { y0 = null; return; }
+        var f = document.activeElement;
+        if (f && sh.contains(f) && f.matches('input,textarea,select')) { f.blur(); y0 = null; claimed = false; return; }
+        sh.classList.add('dragging');
+        y0 = y;
+        dy = 0;
+      }
+      e.preventDefault();
+      sh.style.transform = 'translateY(' + Math.max(0, dy) + 'px)';
+    }, { passive: false });
+    function end() {
+      if (y0 == null || !claimed) { y0 = null; return; }
+      var fast = dy > 30 && dy / Math.max(1, Date.now() - t0) > 0.6;
+      y0 = null;
+      claimed = false;
+      sh.classList.remove('dragging');
+      if (dy > 100 || fast) ctl.close('cancel');
+      else sh.style.transform = '';
+    }
+    sh.addEventListener('touchend', end);
+    sh.addEventListener('touchcancel', end);
+  }
+
+  /* Keyboard: lift sheet content above the iOS keyboard and let the sheet grow while a field has focus */
+  function updateKeyboard() {
+    var vv = window.visualViewport;
+    var kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    if (kb < 60) kb = 0;
+    SHEETS.forEach(function (s) { s.sheet.style.setProperty('--kb', kb + 'px'); });
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateKeyboard);
+    window.visualViewport.addEventListener('scroll', updateKeyboard);
+  }
+  document.addEventListener('focusin', function (e) {
+    var t = e.target;
+    var sh = t && t.closest && t.closest('.sheet');
+    if (sh && t.matches('input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea')) sh.classList.add('typing');
+  });
+  document.addEventListener('focusout', function (e) {
+    var sh = e.target && e.target.closest && e.target.closest('.sheet');
+    if (sh) setTimeout(function () { if (!sh.contains(document.activeElement)) sh.classList.remove('typing'); }, 0);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && SHEETS.length) { e.preventDefault(); SHEETS[SHEETS.length - 1].close('cancel'); }
+  });
 
   /* Menge und Einheit */
   function parseAmount(s) {
@@ -1177,12 +1536,31 @@ textarea {
       var idx = locateMeal(data, meal);
       if (idx < 0) { toast('Der Eintrag hat sich geändert. Lade die Seite neu und versuche es erneut.'); return; }
       var next = data.meals.slice();
-      next.splice(idx, 1);
+      var removed = next.splice(idx, 1)[0];
       await ref.update({ meals: next });
-      toast('Eintrag entfernt.');
+      undoToast('Mahlzeit gelöscht.', function () { restoreMeal(date, removed, idx); });
       });
     } catch (e) {
-      toast('Der Eintrag konnte nicht entfernt werden.');
+      toast('Die Mahlzeit konnte nicht gelöscht werden.');
+    }
+  }
+  /* Undo of a deleted meal: put it back at its old place unless it is already there again */
+  async function restoreMeal(date, meal, idx) {
+    if (!dbRef) return;
+    try {
+      await dbTask(async function () {
+        var ref = dbRef.doc('days/' + date);
+        var snap = await ref.get();
+        var data = snap.exists ? snap.data() : null;
+        var meals = data && Array.isArray(data.meals) ? data.meals.slice() : [];
+        if (meal.id && meals.some(function (x) { return x && x.id === meal.id; })) return;
+        meals.splice(Math.min(idx, meals.length), 0, meal);
+        if (data) await ref.update({ meals: meals });
+        else await ref.set({ date: date, meals: meals });
+      });
+      toast('Mahlzeit wiederhergestellt.');
+    } catch (e) {
+      toast('Die Mahlzeit konnte nicht wiederhergestellt werden.');
     }
   }
 
@@ -1206,18 +1584,18 @@ textarea {
   /* Eine Zutat im Entwurf ändern: transform bekommt die Zutat und liefert die neue oder einen Fehlertext. */
   function applyEdit(date, meal, part, transform) {
     var d = mealDraft;
-    if (!d) { render(true); return; }
+    if (!d) { afterTap(renderCommit); return; }
     var cur = d.parts[part._pi];
     if (!cur || cur.name !== part.name) {
       toast('Der Eintrag hat sich geändert. Lade die Seite neu und versuche es erneut.');
-      render(true);
+      afterTap(renderCommit);
       return;
     }
     var res = transform(cur);
-    if (res.error) { toast(res.error); render(true); return; }
+    if (res.error) { toast(res.error); afterTap(renderCommit); return; }
     if (res.remove) d.parts.splice(part._pi, 1); else d.parts[part._pi] = res.part;
     d.dirty = true;
-    render(true);
+    afterTap(renderCommit);
   }
 
   function commitQty(date, meal, part, old, raw) {
@@ -1345,7 +1723,13 @@ textarea {
     var ta = el('td', 'act');
     if (ctx && ctx.edit) {
       var del = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      confirmTap(del, function () { applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; }); }, 'Lebensmittel löschen?', String(p.name || ''));
+      del.addEventListener('click', function () {
+        var before = mealDraft ? mealDraft.parts.slice() : null, key = mealDraft && mealDraft.key;
+        applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; });
+        if (before) undoToast(String(p.name || 'Lebensmittel') + ' entfernt.', function () {
+          if (mealDraft && mealDraft.key === key) { mealDraft.parts = before; render(true); }
+        });
+      });
       ta.append(del);
     }
     tr.append(ta);
@@ -1358,41 +1742,6 @@ textarea {
     b.title = label;
     b.innerHTML = ICONS[name];
     return b;
-  }
-  /* Mülltonne: Popup mit Abbrechen | Löschen */
-  function askConfirm(title, text) {
-    return new Promise(function (resolve) {
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'alertdialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', title);
-      m.append(el('h3', null, title));
-      if (text) m.append(el('p', 'note', text));
-      var row = el('div', 'ask-row');
-      var cancel = el('button', 'btn ghost', 'Abbrechen');
-      cancel.type = 'button';
-      var ok = el('button', 'btn danger', 'Löschen');
-      ok.type = 'button';
-      cancel.style.flex = '1';
-      ok.style.flex = '1';
-      function onKey(e) { if (e.key === 'Escape') close(false); }
-      function close(v) { document.removeEventListener('keydown', onKey); back.remove(); resolve(v); }
-      cancel.addEventListener('click', function () { close(false); });
-      ok.addEventListener('click', function () { close(true); });
-      back.addEventListener('click', function (e) { if (e.target === back) close(false); });
-      document.addEventListener('keydown', onKey);
-      row.append(cancel, ok);
-      m.append(row);
-      back.append(m);
-      document.body.append(back);
-      cancel.focus();
-    });
-  }
-  function confirmTap(btn, action, title, text) {
-    btn.addEventListener('click', async function () {
-      if (await askConfirm(title || 'Wirklich löschen?', text)) action();
-    });
   }
   function editCell(c, p, ctx) {
     if (c.calc && c.key !== 'gi') return numCell(c, p);
@@ -1540,7 +1889,7 @@ textarea {
     pen.disabled = !editable;
     pen.addEventListener('click', function () { editKey = edit ? null : mkey; mealDraft = null; render(true); });
     var rm = iconBtn('trash', 'Mahlzeit entfernen', '');
-    confirmTap(rm, function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); }, 'Mahlzeit löschen?', 'Alle Lebensmittel dieser Mahlzeit werden entfernt.');
+    rm.addEventListener('click', function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); });
     var fav = isFav(mealKeyOf(m));
     var star = iconBtn('star', fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen', fav ? 'fav-on' : '');
     star.setAttribute('aria-pressed', String(fav));
@@ -1613,6 +1962,7 @@ textarea {
       head.append(nm);
     }
     var wrap = el('div', 'tbl-wrap');
+    wrap.setAttribute('data-k', mkey);
     var tbl = el('table', 'ntable');
     var body = document.createElement('tbody');
     var ctx = editable ? { editable: true, date: date, meal: m, edit: edit } : null;
@@ -1643,7 +1993,7 @@ textarea {
       var c = el('div', 'chip');
       var goal = GOALS[n.key] > 0 ? GOALS[n.key] : 0;
       var kg = n.key === 'potassium';
-      function showV(v) { return kg ? (v / 1000).toLocaleString(LOCALE, { maximumFractionDigits: 2 }) + ' g' : fmtNut(n, v) + ' ' + n.unit; }
+      function showV(v) { return kg ? nf(2).format(v / 1000) + ' g' : fmtNut(n, v) + ' ' + n.unit; }
       c.append(el('span', 'chip-label', n.short || n.label), el('span', 'chip-val', t ? showV(t[n.key]) : '—'));
       if (t && goal) {
         c.append(el('span', 'chip-goal', (n.max ? 'max. ' : 'Ziel ') + showV(goal)));
@@ -1924,40 +2274,63 @@ textarea {
     $('logged').textContent = String(days.filter(function (dd) { return mealsOf(dd).length > 0; }).length);
   }
 
+  /* Earlier days: 60 at a time (more load as you scroll near the end). A day's tables are built only
+     when it is opened, so a long history costs a list of summaries, not hundreds of wide tables. */
+  var HIST_PAGE = 60, histLimit = HIST_PAGE, moreObserver = null;
   function renderHistory(today) {
     var box = $('history');
     if (lockMeals(true) && box.children.length) return;
     box.replaceChildren();
+    if (moreObserver) moreObserver.disconnect();
     var past = days
       .filter(function (d) { return d.date < today && mealsOf(d).length > 0; })
       .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     $('history-empty').hidden = status !== 'ready' || past.length > 0;
-    past.forEach(function (d) {
+    past.slice(0, histLimit).forEach(function (d) {
       var det = el('details', 'day');
-      if (openDays.has(d.date) || editDate() === d.date) det.open = true;
-      det.addEventListener('toggle', function () { if (det.open) openDays.add(d.date); else openDays.delete(d.date); });
+      var t = dayTotals(d);
+      var built = false;
+      function build() {
+        if (built) return;
+        built = true;
+        var body = el('div', 'day-body');
+        body.append(chips(t));
+        mealCards(d, d.date).forEach(function (c) { body.append(c); });
+        det.append(body);
+      }
+      det.addEventListener('toggle', function () {
+        if (det.open) { openDays.add(d.date); build(); } else openDays.delete(d.date);
+      });
       var sum = el('summary');
+      var diff = Math.round(t.kcal - TARGET);
       sum.append(
         el('span', 'd-date', fmtDate(d.date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })),
-        el('span', 'd-total', (function () {
-          var g = dayTotals(d).gl;
-          var diff = Math.round(totalOf(d) - TARGET);
-          return fmtN(totalOf(d)) + ' kcal (' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') + fmtN(Math.abs(diff)) + ')' +
-            (g != null ? ' · GL ' + fmtN(g) : '');
-        })())
+        el('span', 'd-total', fmtN(t.kcal) + ' kcal (' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') + fmtN(Math.abs(diff)) + ')' +
+          (t.gl != null ? ' · GL ' + fmtN(t.gl) : ''))
       );
-      var body = el('div', 'day-body');
-      body.append(chips(dayTotals(d)));
-      mealCards(d, d.date).forEach(function (c) { body.append(c); });
-      det.append(sum, body);
+      det.append(sum);
+      if (openDays.has(d.date) || editDate() === d.date) { det.open = true; build(); }
       box.append(det);
     });
+    if (past.length > histLimit) {
+      var more = el('button', 'more-btn', 'Weitere Tage anzeigen (' + histLimit + ' von ' + past.length + ')');
+      more.type = 'button';
+      more.addEventListener('click', function () { histLimit += HIST_PAGE; renderHistory(keyOf(new Date())); });
+      box.append(more);
+      if ('IntersectionObserver' in window) {
+        if (!moreObserver) moreObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) { moreObserver.unobserve(e.target); e.target.click(); } });
+        }, { rootMargin: '0px 0px 600px 0px' });
+        moreObserver.observe(more);
+      }
+    }
   }
+
 
   /* Wasser: Tagesmenge in ml im Tagesdokument (Feld water) */
   var waterBusy = false;
   function waterGoal() { return GOALS.water > 0 ? GOALS.water : 2500; }
-  function fmtL(ml) { return (ml / 1000).toLocaleString(LOCALE, { maximumFractionDigits: 2 }) + ' L'; }
+  function fmtL(ml) { return nf(2).format(ml / 1000) + ' L'; }
   async function addWater(date, delta) {
     if (!dbRef) return;
     try {
@@ -2220,16 +2593,16 @@ textarea {
   /* Änderung im Entwurf der Koffein-Tabelle; geschrieben wird erst mit Speichern */
   function editCaf(date, mutate) {
     var st = cafDraft;
-    if (!st || st.date !== date) { render(true); return; }
+    if (!st || st.date !== date) { afterTap(renderCommit); return; }
     var err = mutate(st);
-    if (err) { toast(err); render(true); return; }
+    if (err) { toast(err); afterTap(renderCommit); return; }
     function cl(v, mx) { return Math.min(mx, Math.max(0, Math.round(v))); }
     st.coffee = cl(st.coffee, 10000);
     st.caffeine = cl(st.caffeine, 5000);
     st.cola = cl(st.cola, 10000);
     if (st.log.length > 200) st.log = st.log.slice(-200);
     st.dirty = true;
-    render(true);
+    afterTap(renderCommit);
   }
   async function saveCafDraft() {
     var d = cafDraft;
@@ -2298,6 +2671,7 @@ textarea {
     });
     return inp;
   }
+  /* Koffein-Tabelle: Ansicht und Bearbeitung der Einträge (Entwurf siehe 08-caf-draft.js) */
   function renderCafTable(date, day) {
     var box = $('caf-table');
     if (lockCaf(date) && box.children.length) return;
@@ -2335,6 +2709,7 @@ textarea {
       return;
     }
     var wrap = el('div', 'tbl-wrap');
+    wrap.setAttribute('data-k', 'caf-' + date);
     var tbl = el('table', 'ntable ctable');
     var thd = document.createElement('thead');
     var htr = el('tr');
@@ -2452,8 +2827,12 @@ textarea {
       var tdA = el('td', 'act');
       if (edit) {
         var del = iconBtn('trash', 'Eintrag entfernen', 'row-del');
-        confirmTap(del, function () {
+        del.addEventListener('click', function () {
           del.disabled = true;
+          var snapshot = cafDraft ? JSON.parse(JSON.stringify(cafDraft)) : null;
+          undoToast('Eintrag entfernt.', function () {
+            if (snapshot && cafDraft && cafDraft.date === snapshot.date) { cafDraft = snapshot; render(true); }
+          });
           editCaf(date, function (st) {
             if (r.untimed) {
               var rem = cafUntimedNow(st, r.k);
@@ -2464,8 +2843,8 @@ textarea {
               cafContrib(st, e, -1);
               st.log.splice(r._i, 1);
             }
-          }, 'Eintrag entfernt.');
-        }, 'Eintrag löschen?', 'Menge und Koffein werden vom Tag abgezogen.');
+          });
+        });
         tdA.append(del);
       }
       tr.append(tdT, tdK, tdM, tdG, tdA);
@@ -2510,12 +2889,62 @@ textarea {
     var today = keyOf(new Date());
     if (k > today) k = today;
     if (k !== viewKey) { editKey = null; cafEditKey = null; mealDraft = null; cafDraft = null; }
+    var dir = viewKey && k !== viewKey ? (k < viewKey ? -1 : 1) : 0;
     viewKey = k;
     following = k === today;
     render(true);
+    if (dir) slideDay(dir);
+  }
+  /* The new day slides in from the side it comes from (earlier days from the left) */
+  function slideDay(dir) {
+    if (REDUCED) return;
+    var page = document.querySelector('.page');
+    if (!page || !page.animate) return;
+    page.animate([{ transform: 'translateX(' + (dir * 28) + 'px)', opacity: 0.4 }, { transform: 'none', opacity: 1 }],
+      { duration: 240, easing: 'cubic-bezier(.2, .9, .25, 1)' });
   }
 
+  /* Re-renders rebuild the DOM. Keep what the person was doing: the horizontal scroll of each keyed
+     table (data-k) and the focused field (by id). */
+  function saveViewState() {
+    var a = document.activeElement;
+    var st = { focus: null, scroll: [] };
+    if (a && a.id && a.matches && a.matches('input,select,textarea')) st.focus = a.id;
+    document.querySelectorAll('.tbl-wrap[data-k]').forEach(function (w) { if (w.scrollLeft) st.scroll.push([w.getAttribute('data-k'), w.scrollLeft]); });
+    return st;
+  }
+  function restoreViewState(st) {
+    st.scroll.forEach(function (s) {
+      var w = document.querySelector('.tbl-wrap[data-k="' + CSS.escape(s[0]) + '"]');
+      if (w && w.scrollLeft !== s[1]) w.scrollLeft = s[1];
+    });
+    if (st.focus) {
+      var f = document.getElementById(st.focus);
+      if (f && f !== document.activeElement) { try { f.focus({ preventScroll: true }); } catch (e) {} }
+    }
+  }
+
+  /* An edit commits on "change", which fires while the finger or mouse that moved focus is still down.
+     Rebuilding then would swallow that tap (on the next field or on Speichern), so wait until it is up. */
+  var pointerIsDown = false, pendingCommits = [];
+  function renderCommit() { render(true); }
+  function afterTap(fn) {
+    if (pendingCommits.indexOf(fn) < 0) pendingCommits.push(fn);
+    if (!pointerIsDown) setTimeout(flushCommits, 0);
+  }
+  function flushCommits() {
+    if (pointerIsDown || !pendingCommits.length) return;
+    var list = pendingCommits;
+    pendingCommits = [];
+    list.forEach(function (fn) { fn(); });
+  }
+  document.addEventListener('pointerdown', function () { pointerIsDown = true; }, true);
+  ['pointerup', 'pointercancel'].forEach(function (t) {
+    document.addEventListener(t, function () { pointerIsDown = false; if (pendingCommits.length) setTimeout(flushCommits, 0); }, true);
+  });
+
   function render(force) {
+    var view = saveViewState();
     renderForce = force === true;
     var today = keyOf(new Date());
     var byDate = new Map();
@@ -2529,6 +2958,7 @@ textarea {
     renderChart(today, byDate);
     renderHistory(today);
     renderForce = false;
+    restoreViewState(view);
   }
 
   /* Mahlzeit hinzufügen: Claude schätzt, die Person prüft die Kalorien, dann wird gespeichert. */
@@ -2766,48 +3196,43 @@ textarea {
     if (!BLS || c.length < 4) return [];
     return BLS.filter(function (y) { return y.w === c; }).sort(function (a, b) { return a.c.length - b.c.length; });
   }
+  /* Question sheet: one row per option, optional free text. Resolves the option index, the typed text,
+     or -1 when skipped or dismissed (pull down, scrim, Escape). */
   function askChoice(question, options, skipLabel, allowText) {
     return new Promise(function (resolve) {
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'dialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', question);
-      m.append(el('h3', null, question));
-      function close(v) { back.remove(); resolve(v); }
-      var first = null;
+      var result = -1;
+      var sheet = makeSheet({ title: '', cancel: skipLabel || 'Überspringen', role: 'dialog', onDismiss: function () { resolve(result); } });
+      sheet.sheet.setAttribute('aria-label', question);
+      function pick(v) { result = v; sheet.close('done'); }
+      var q = el('h3', 'choice-q', question);
+      var list = el('div', 'grp-list choice-list');
       options.forEach(function (o, i) {
-        var b = el('button', 'opt');
+        var cell = el('div', 'cell');
+        var b = el('button', 'cell-btn');
         b.type = 'button';
-        b.append(el('b', null, String.fromCharCode(65 + i) + ':'), document.createTextNode(' ' + o));
-        b.addEventListener('click', function () { close(i); });
-        if (!first) first = b;
-        m.append(b);
+        b.append(el('b', null, String.fromCharCode(65 + i)), document.createTextNode(o));
+        b.addEventListener('click', function () { pick(i); });
+        cell.append(b);
+        list.append(cell);
       });
+      sheet.body.append(q, list);
       if (allowText) {
         var row = el('div', 'ask-row');
         var inp = el('input');
         inp.type = 'text';
+        inp.id = 'choice-text-' + sheetSeq;
         inp.placeholder = 'Oder selbst genauer beschreiben…';
         inp.setAttribute('aria-label', 'Selbst genauer beschreiben');
         inp.enterKeyHint = 'done';
         var ok = el('button', 'btn', 'OK');
         ok.type = 'button';
-        var submit = function () { var v = inp.value.trim(); if (v) close(v); };
+        var submit = function () { var v = inp.value.trim(); if (v) pick(v); };
         ok.addEventListener('click', submit);
         inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
         row.append(inp, ok);
-        m.append(row);
+        sheet.body.append(row);
       }
-      if (skipLabel) {
-        var s = el('button', 'opt ghost', skipLabel);
-        s.type = 'button';
-        s.addEventListener('click', function () { close(-1); });
-        m.append(s);
-      }
-      back.append(m);
-      document.body.append(back);
-      if (first) first.focus();
+      sheet.open();
     });
   }
   /* Tippfehler: Levenshtein-Abstand mit frühem Abbruch */
@@ -2959,10 +3384,12 @@ textarea {
 
   function showPreview(parts, note, name) {
     var box = $('preview');
+    var view = saveViewState();
     box.replaceChildren();
     if (name !== undefined) { previewName = cleanName(name); previewNameTouched = false; }
     var inputs = [];
     var wrap = el('div', 'tbl-wrap');
+    wrap.setAttribute('data-k', 'preview');
     var tbl = el('table', 'ntable');
     var body = document.createElement('tbody');
     var kcalSum = null;
@@ -2973,7 +3400,7 @@ textarea {
     function updateTotal() { if (kcalSum) kcalSum.textContent = fmtN(sumKcal()); }
     function rebuild(skip) {
       parts.forEach(function (pp, n) { if (n !== skip && inputs[n]) pp.kcal = Math.max(0, Math.round(Number(inputs[n].value) || 0)); });
-      showPreview(parts, note);
+      afterTap(function () { showPreview(parts, note); });
     }
     function applyQty(p, i, q, unit) {
       var cur = Math.max(0, Math.round(Number(inputs[i].value) || 0));
@@ -3089,7 +3516,14 @@ textarea {
       });
       var tdAct = el('td', 'act');
       var rdel = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      confirmTap(rdel, function () { removeRow(i); }, 'Lebensmittel entfernen?', String(p.name || ''));
+      rdel.addEventListener('click', function () {
+        var removed = p;
+        removeRow(i);
+        undoToast(String(removed.name || 'Lebensmittel') + ' entfernt.', function () {
+          parts.splice(Math.min(i, parts.length), 0, removed);
+          showPreview(parts, note);
+        });
+      });
       tdAct.append(rdel);
       tr.append(tdAct);
       body.append(tr);
@@ -3150,6 +3584,7 @@ textarea {
     save.addEventListener('click', saveMeal);
     discard.addEventListener('click', function () { pending = null; box.hidden = true; box.replaceChildren(); setChangeMode(false, true); });
     setChangeMode(true);
+    restoreViewState(view);
   }
 
   var MODELS = {
@@ -3438,17 +3873,18 @@ textarea {
   }
 
   /* Einstellungen */
-  var GOAL_FIELDS = [{ key: 'kcal', label: 'Kalorien', unit: 'kcal', dec: 0 }].concat(NUTS.map(function (n) {
-    return { key: n.key, label: n.label + (n.max ? ' (Maximum)' : ''), unit: n.key === 'potassium' ? 'g' : n.unit, dec: n.dec, div: n.key === 'potassium' ? 1000 : 0 };
+  /* grid: which settings group the field appears in */
+  var GOAL_FIELDS = [{ key: 'kcal', label: 'Kalorien', unit: 'kcal', dec: 0, grid: 'goal-grid' }].concat(NUTS.map(function (n) {
+    return { key: n.key, label: n.label, note: n.max ? 'Maximum' : '', unit: n.key === 'potassium' ? 'g' : n.unit, dec: n.dec, div: n.key === 'potassium' ? 1000 : 0, grid: 'goal-grid' };
   })).concat([
-    { key: 'water', label: 'Wasser', unit: 'ml', dec: 0, def: 2500 },
-    { key: 'glLow', label: 'GL pro Tag: niedrig bis', unit: 'GL', dec: 0, def: 80 },
-    { key: 'glMid', label: 'GL pro Tag: mittel bis', unit: 'GL', dec: 0, def: 120 },
-    { key: 'caffeine', label: 'Koffein (Maximum)', unit: 'mg', dec: 0, def: 400 },
-    { key: 'weight', label: 'Körpergewicht', unit: 'kg', dec: 1, def: 70 },
-    { key: 'cafCutoff', label: 'Kein Koffein nach (Uhr)', unit: 'Uhr', dec: 0, def: 15 },
-    { key: 'nakGood', label: 'Na:K gut ab (1 : x)', unit: 'x', dec: 1, def: 2 },
-    { key: 'nakMid', label: 'Na:K mittel ab (1 : x)', unit: 'x', dec: 1, def: 1 }
+    { key: 'water', label: 'Wasser', unit: 'ml', dec: 0, def: 2500, grid: 'goal-grid' },
+    { key: 'glLow', label: 'GL pro Tag: niedrig bis', unit: 'GL', dec: 0, def: 80, grid: 'goal-grid-limits' },
+    { key: 'glMid', label: 'GL pro Tag: mittel bis', unit: 'GL', dec: 0, def: 120, grid: 'goal-grid-limits' },
+    { key: 'nakGood', label: 'Na:K gut ab', note: '1 : x', unit: 'x', dec: 1, def: 2, grid: 'goal-grid-limits' },
+    { key: 'nakMid', label: 'Na:K mittel ab', note: '1 : x', unit: 'x', dec: 1, def: 1, grid: 'goal-grid-limits' },
+    { key: 'caffeine', label: 'Koffein', note: 'Maximum pro Tag', unit: 'mg', dec: 0, def: 400, grid: 'goal-grid-caf' },
+    { key: 'cafCutoff', label: 'Kein Koffein nach', unit: 'Uhr', dec: 0, def: 15, grid: 'goal-grid-caf' },
+    { key: 'weight', label: 'Körpergewicht', unit: 'kg', dec: 1, def: 70, grid: 'goal-grid-caf' }
   ]);
   var themeDraft = 'dark';
   function systemTheme() {
@@ -3460,7 +3896,7 @@ textarea {
   function renderThemeSeg() {
     var seg = $('theme-seg');
     seg.replaceChildren();
-    [['dark', 'Dunkel'], ['light', 'Hell'], ['system', 'System']].forEach(function (o) {
+    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'Automatisch']].forEach(function (o) {
       var b = el('button', null, o[1]);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(themeDraft === o[0]));
@@ -3471,21 +3907,24 @@ textarea {
       seg.append(b);
     });
   }
+  /* One settings cell per goal: label left, value and unit right; an empty value means no goal */
   function buildGoalGrid() {
-    var grid = $('goal-grid');
-    grid.replaceChildren();
+    ['goal-grid', 'goal-grid-limits', 'goal-grid-caf'].forEach(function (id) { $(id).replaceChildren(); });
     GOAL_FIELDS.forEach(function (f) {
-      var wrap = el('div', 'goal');
-      var lab = el('label', null, f.label + ' (' + f.unit + ')');
-      lab.htmlFor = 'g-' + f.key;
-      var inp = el('input');
+      var cell = el('label', 'cell');
+      cell.htmlFor = 'g-' + f.key;
+      var lab = el('span', 'cell-l', f.label);
+      if (f.note) lab.append(el('small', null, f.note));
+      var inp = el('input', 'cell-in');
       inp.type = 'number';
       inp.id = 'g-' + f.key;
       inp.min = '0';
       inp.step = 'any';
       inp.inputMode = 'decimal';
-      wrap.append(lab, inp);
-      grid.append(wrap);
+      inp.placeholder = 'kein';
+      doneKey(inp);
+      cell.append(lab, inp, el('span', 'cell-u', f.unit));
+      $(f.grid).append(cell);
     });
   }
   function fillGoalInputs() {
@@ -3559,23 +3998,25 @@ textarea {
     setBusy(false);
     return ok;
   }
+  /* Abbrechen, the scrim, Escape and pulling the sheet down all discard unsaved changes; Fertig saves */
+  var settingsSheet = sheetCtl($('settings'), {
+    keep: true,
+    onDismiss: function () {
+      $('open-settings').setAttribute('aria-expanded', 'false');
+      $('model-tier').value = MODEL_SAVED;
+      fillGoalInputs();
+    }
+  });
   function openSettings() {
     themeDraft = THEME;
     renderThemeSeg();
     $('model-tier').value = MODEL_SAVED;
     fillGoalInputs();
-    $('settings').hidden = false;
+    settingsSheet.body.scrollTop = 0;
+    settingsSheet.open();
     $('open-settings').setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-    $('save-goals').focus();
   }
-  function closeSettings() {
-    $('settings').hidden = true;
-    $('open-settings').setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-    $('model-tier').value = MODEL_SAVED;
-    fillGoalInputs();
-  }
+  function closeSettings() { settingsSheet.close('cancel'); }
   async function saveSettings() {
     if (dbRef) {
       var ok = await saveGoals();
@@ -3598,14 +4039,16 @@ textarea {
   $('daylabel').addEventListener('click', function () { goTo(keyOf(new Date())); });
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.closest && e.target.closest('textarea,input,select')) return;
-    if (!$('settings').hidden) return;
+    if (SHEETS.length) return;
     if (e.key === 'ArrowLeft') goTo(addDays(viewKey, -1));
     else if (e.key === 'ArrowRight') goTo(addDays(viewKey, 1));
   });
+  /* Swipe between days: clearly horizontal (over 60 px and 1.6x the vertical movement), never from
+     fields, wide tables, the chart, history, the preview or an open sheet. A swipe also closes the keyboard. */
   var swipeX = null, swipeY = null;
   document.addEventListener('touchstart', function (e) {
     var tgt = e.target;
-    if (e.touches.length !== 1 || (tgt && tgt.closest && tgt.closest('textarea,input,select,.tbl-wrap,#chart,#history,.preview,.toast,#settings'))) { swipeX = null; return; }
+    if (e.touches.length !== 1 || SHEETS.length || (tgt && tgt.closest && tgt.closest('textarea,input,select,.tbl-wrap,#chart,#history,.preview,.toast,.sheet-back'))) { swipeX = null; return; }
     swipeX = e.touches[0].clientX;
     swipeY = e.touches[0].clientY;
   }, { passive: true });
@@ -3614,15 +4057,15 @@ textarea {
     var t = e.changedTouches[0];
     var dx = t.clientX - swipeX, dy = t.clientY - swipeY;
     swipeX = null;
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    var f = document.activeElement;
+    if (f && f.matches && f.matches('input,textarea,select')) f.blur();
     goTo(addDays(viewKey, dx > 0 ? -1 : 1));
   }, { passive: true });
 
   renderThemeSeg();
   buildGoalGrid();
   $('open-settings').addEventListener('click', openSettings);
-  $('settings').addEventListener('click', function (e) { if (e.target === $('settings')) closeSettings(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('settings').hidden) closeSettings(); });
 
   /* Barcode: Foto aus der Kamera-App, Nummer mit ZXing lesen, Zeile "Menge + EAN" einfügen */
   /* Nährwerttabelle fotografieren: Claude liest die Werte pro 100 g ab (nichts geschätzt), nach Bestätigung in die eigene Datenbank */
@@ -3651,16 +4094,16 @@ textarea {
   function askPhotoContext(file) {
     return new Promise(function (resolve) {
       var url = URL.createObjectURL(file);
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'dialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', 'Foto auswerten');
-      m.append(el('h3', null, 'Foto auswerten'));
+      var result = null;
+      var sheet = makeSheet({
+        title: 'Foto auswerten', cancel: 'Abbrechen', done: 'Auswerten',
+        onDone: function () { result = ta.value.trim().slice(0, 500); sheet.close('done'); },
+        onDismiss: function () { URL.revokeObjectURL(url); resolve(result); }
+      });
       var img = el('img');
       img.src = url;
       img.alt = 'Aufgenommenes Foto';
-      img.style.cssText = 'width:100%;max-height:220px;object-fit:contain;border-radius:14px;background:var(--bg)';
+      img.style.cssText = 'width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--cell)';
       var lab = el('label', 'hint', 'Kontext (optional)');
       lab.htmlFor = 'photo-ctx';
       var ta = el('textarea');
@@ -3668,24 +4111,8 @@ textarea {
       ta.rows = 3;
       ta.maxLength = 500;
       ta.placeholder = 'z. B. Portion halb gegessen, mit Olivenöl gebraten, Produktname …';
-      var row = el('div', 'ask-row');
-      var cancel = el('button', 'btn ghost', 'Abbrechen');
-      cancel.type = 'button';
-      var ok = el('button', 'btn', 'Auswerten');
-      ok.type = 'button';
-      cancel.style.flex = '1';
-      ok.style.flex = '1';
-      function onKey(e) { if (e.key === 'Escape') close(null); }
-      function close(v) { document.removeEventListener('keydown', onKey); URL.revokeObjectURL(url); back.remove(); resolve(v); }
-      cancel.addEventListener('click', function () { close(null); });
-      ok.addEventListener('click', function () { close(ta.value.trim().slice(0, 500)); });
-      back.addEventListener('click', function (e) { if (e.target === back) close(null); });
-      document.addEventListener('keydown', onKey);
-      row.append(cancel, ok);
-      m.append(img, lab, ta, row);
-      back.append(m);
-      document.body.append(back);
-      ta.focus();
+      sheet.body.append(img, lab, ta);
+      sheet.open();
     });
   }
   $('nut-file').addEventListener('change', async function () {
@@ -4040,18 +4467,14 @@ textarea {
     var sel = [];
     var portions = new Map();
     var typeFilter = 'all';
-    var back = el('div', 'modal-back');
-    var m = el('div', 'modal pick-modal');
-    m.setAttribute('role', 'dialog');
-    m.setAttribute('aria-modal', 'true');
-    m.setAttribute('aria-labelledby', 'pick-title');
-    var head = el('div', 'pick-head');
-    var h = el('h3', null, isFavMode ? '★ Favoriten' : '↺ Vergangene Lebensmittel');
-    h.id = 'pick-title';
-    var x = el('button', 'pick-x', '×');
-    x.type = 'button';
-    x.setAttribute('aria-label', 'Schließen');
-    head.append(h, x);
+    /* Every way of closing (Fertig, pull down, scrim, Escape) keeps the selection, as before */
+    var sheet = makeSheet({
+      title: isFavMode ? 'Favoriten' : 'Vergangene Lebensmittel', done: 'Fertig', cls: 'pick-sheet',
+      onDismiss: function () {
+        pickOpen = null;
+        if (sel.length) openSelection(sel, source);
+      }
+    });
     var forDay = el('p', 'pick-for', 'Für: ' + dayLabel(viewKey || keyOf(new Date())) + '. Werte je 100 g; Portion einstellen und mit + auswählen.');
     var tools = el('div', 'pick-tools');
     var search = el('input', 'pick-search');
@@ -4069,7 +4492,7 @@ textarea {
     sortSel.value = PICK_SORT;
     tools.append(search, sortSel);
     if (isFavMode) {
-      var seg = el('div', 'seg');
+      var seg = el('div', 'ios-seg');
       seg.setAttribute('role', 'group');
       seg.setAttribute('aria-label', 'Art');
       [['all', 'Alle'], ['meal', 'Mahlzeiten'], ['food', 'Lebensmittel']].forEach(function (o) {
@@ -4090,19 +4513,16 @@ textarea {
     var sum = el('span', 'pick-sum');
     var clear = el('button', 'btn ghost', 'Leeren');
     clear.type = 'button';
-    var done = el('button', 'btn', 'Fertig');
-    done.type = 'button';
-    foot.append(sum, clear, done);
-    m.append(head, forDay, tools, list, foot);
-    back.append(m);
-    document.body.append(back);
-    document.body.style.overflow = 'hidden';
+    var done = sheet.doneBtn;
+    foot.append(sum, clear);
+    sheet.body.append(forDay, tools, list);
+    sheet.addFoot().append(foot);
 
     function updateFoot() {
       var kc = sel.reduce(function (s, it) { return s + it.parts.reduce(function (a, p) { return a + (Number(p.kcal) || 0); }, 0); }, 0);
       sum.textContent = sel.length ? sel.length + ' ausgewählt · ' + fmtN(kc) + ' kcal' : 'Nichts ausgewählt';
       clear.hidden = !sel.length;
-      done.textContent = sel.length ? 'Übernehmen' : 'Schließen';
+      done.textContent = sel.length ? 'Übernehmen' : 'Fertig';
     }
     function flash(btn) { btn.textContent = '✓'; setTimeout(function () { btn.textContent = '+'; }, 900); }
     function starBtn(fav, onClick) {
@@ -4207,20 +4627,7 @@ textarea {
         list.append(r.kind === 'meal' ? mealRowEl(r.fav, r.count) : foodRowEl(r.food, r.count));
       });
     }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-    function close() {
-      document.removeEventListener('keydown', onKey);
-      back.remove();
-      document.body.style.overflow = '';
-      pickOpen = null;
-      if (sel.length) openSelection(sel, source);
-      else $(isFavMode ? 'open-favs' : 'open-recent').focus();
-    }
-    x.addEventListener('click', close);
-    done.addEventListener('click', close);
     clear.addEventListener('click', function () { sel = []; updateFoot(); });
-    back.addEventListener('click', function (e) { if (e.target === back) close(); });
-    document.addEventListener('keydown', onKey);
     search.addEventListener('input', rerender);
     sortSel.addEventListener('change', function () {
       PICK_SORT = sortSel.value;
@@ -4230,7 +4637,7 @@ textarea {
     pickOpen = { mode: mode, rerender: rerender };
     updateFoot();
     rerender();
-    x.focus();
+    sheet.open();
   }
   $('open-recent').addEventListener('click', function () { openPicker('recent'); });
   $('open-favs').addEventListener('click', function () { openPicker('fav'); });
@@ -4271,7 +4678,7 @@ textarea {
       return dbRef.doc('settings/goals').onSnapshot(function (snap) {
         GOALS = snap.exists ? sanitizeGoals(snap.data()) : {};
         applyGoals();
-        if ($('settings').hidden) fillGoalInputs();
+        if (!settingsSheet.isOpen) fillGoalInputs();
         render();
       }, fail);
     });

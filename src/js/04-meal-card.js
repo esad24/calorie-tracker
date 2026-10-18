@@ -23,7 +23,7 @@
     pen.disabled = !editable;
     pen.addEventListener('click', function () { editKey = edit ? null : mkey; mealDraft = null; render(true); });
     var rm = iconBtn('trash', 'Mahlzeit entfernen', '');
-    confirmTap(rm, function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); }, 'Mahlzeit löschen?', 'Alle Lebensmittel dieser Mahlzeit werden entfernt.');
+    rm.addEventListener('click', function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); });
     var fav = isFav(mealKeyOf(m));
     var star = iconBtn('star', fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen', fav ? 'fav-on' : '');
     star.setAttribute('aria-pressed', String(fav));
@@ -96,6 +96,7 @@
       head.append(nm);
     }
     var wrap = el('div', 'tbl-wrap');
+    wrap.setAttribute('data-k', mkey);
     var tbl = el('table', 'ntable');
     var body = document.createElement('tbody');
     var ctx = editable ? { editable: true, date: date, meal: m, edit: edit } : null;
@@ -126,7 +127,7 @@
       var c = el('div', 'chip');
       var goal = GOALS[n.key] > 0 ? GOALS[n.key] : 0;
       var kg = n.key === 'potassium';
-      function showV(v) { return kg ? (v / 1000).toLocaleString(LOCALE, { maximumFractionDigits: 2 }) + ' g' : fmtNut(n, v) + ' ' + n.unit; }
+      function showV(v) { return kg ? nf(2).format(v / 1000) + ' g' : fmtNut(n, v) + ' ' + n.unit; }
       c.append(el('span', 'chip-label', n.short || n.label), el('span', 'chip-val', t ? showV(t[n.key]) : '—'));
       if (t && goal) {
         c.append(el('span', 'chip-goal', (n.max ? 'max. ' : 'Ziel ') + showV(goal)));

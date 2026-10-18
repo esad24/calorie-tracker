@@ -6,18 +6,14 @@
     var sel = [];
     var portions = new Map();
     var typeFilter = 'all';
-    var back = el('div', 'modal-back');
-    var m = el('div', 'modal pick-modal');
-    m.setAttribute('role', 'dialog');
-    m.setAttribute('aria-modal', 'true');
-    m.setAttribute('aria-labelledby', 'pick-title');
-    var head = el('div', 'pick-head');
-    var h = el('h3', null, isFavMode ? '★ Favoriten' : '↺ Vergangene Lebensmittel');
-    h.id = 'pick-title';
-    var x = el('button', 'pick-x', '×');
-    x.type = 'button';
-    x.setAttribute('aria-label', 'Schließen');
-    head.append(h, x);
+    /* Every way of closing (Fertig, pull down, scrim, Escape) keeps the selection, as before */
+    var sheet = makeSheet({
+      title: isFavMode ? 'Favoriten' : 'Vergangene Lebensmittel', done: 'Fertig', cls: 'pick-sheet',
+      onDismiss: function () {
+        pickOpen = null;
+        if (sel.length) openSelection(sel, source);
+      }
+    });
     var forDay = el('p', 'pick-for', 'Für: ' + dayLabel(viewKey || keyOf(new Date())) + '. Werte je 100 g; Portion einstellen und mit + auswählen.');
     var tools = el('div', 'pick-tools');
     var search = el('input', 'pick-search');
@@ -35,7 +31,7 @@
     sortSel.value = PICK_SORT;
     tools.append(search, sortSel);
     if (isFavMode) {
-      var seg = el('div', 'seg');
+      var seg = el('div', 'ios-seg');
       seg.setAttribute('role', 'group');
       seg.setAttribute('aria-label', 'Art');
       [['all', 'Alle'], ['meal', 'Mahlzeiten'], ['food', 'Lebensmittel']].forEach(function (o) {
@@ -56,19 +52,16 @@
     var sum = el('span', 'pick-sum');
     var clear = el('button', 'btn ghost', 'Leeren');
     clear.type = 'button';
-    var done = el('button', 'btn', 'Fertig');
-    done.type = 'button';
-    foot.append(sum, clear, done);
-    m.append(head, forDay, tools, list, foot);
-    back.append(m);
-    document.body.append(back);
-    document.body.style.overflow = 'hidden';
+    var done = sheet.doneBtn;
+    foot.append(sum, clear);
+    sheet.body.append(forDay, tools, list);
+    sheet.addFoot().append(foot);
 
     function updateFoot() {
       var kc = sel.reduce(function (s, it) { return s + it.parts.reduce(function (a, p) { return a + (Number(p.kcal) || 0); }, 0); }, 0);
       sum.textContent = sel.length ? sel.length + ' ausgewählt · ' + fmtN(kc) + ' kcal' : 'Nichts ausgewählt';
       clear.hidden = !sel.length;
-      done.textContent = sel.length ? 'Übernehmen' : 'Schließen';
+      done.textContent = sel.length ? 'Übernehmen' : 'Fertig';
     }
     function flash(btn) { btn.textContent = '✓'; setTimeout(function () { btn.textContent = '+'; }, 900); }
     function starBtn(fav, onClick) {
@@ -173,20 +166,7 @@
         list.append(r.kind === 'meal' ? mealRowEl(r.fav, r.count) : foodRowEl(r.food, r.count));
       });
     }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-    function close() {
-      document.removeEventListener('keydown', onKey);
-      back.remove();
-      document.body.style.overflow = '';
-      pickOpen = null;
-      if (sel.length) openSelection(sel, source);
-      else $(isFavMode ? 'open-favs' : 'open-recent').focus();
-    }
-    x.addEventListener('click', close);
-    done.addEventListener('click', close);
     clear.addEventListener('click', function () { sel = []; updateFoot(); });
-    back.addEventListener('click', function (e) { if (e.target === back) close(); });
-    document.addEventListener('keydown', onKey);
     search.addEventListener('input', rerender);
     sortSel.addEventListener('change', function () {
       PICK_SORT = sortSel.value;
@@ -196,7 +176,7 @@
     pickOpen = { mode: mode, rerender: rerender };
     updateFoot();
     rerender();
-    x.focus();
+    sheet.open();
   }
   $('open-recent').addEventListener('click', function () { openPicker('recent'); });
   $('open-favs').addEventListener('click', function () { openPicker('fav'); });

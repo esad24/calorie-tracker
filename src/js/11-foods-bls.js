@@ -36,48 +36,43 @@
     if (!BLS || c.length < 4) return [];
     return BLS.filter(function (y) { return y.w === c; }).sort(function (a, b) { return a.c.length - b.c.length; });
   }
+  /* Question sheet: one row per option, optional free text. Resolves the option index, the typed text,
+     or -1 when skipped or dismissed (pull down, scrim, Escape). */
   function askChoice(question, options, skipLabel, allowText) {
     return new Promise(function (resolve) {
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'dialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', question);
-      m.append(el('h3', null, question));
-      function close(v) { back.remove(); resolve(v); }
-      var first = null;
+      var result = -1;
+      var sheet = makeSheet({ title: '', cancel: skipLabel || 'Überspringen', role: 'dialog', onDismiss: function () { resolve(result); } });
+      sheet.sheet.setAttribute('aria-label', question);
+      function pick(v) { result = v; sheet.close('done'); }
+      var q = el('h3', 'choice-q', question);
+      var list = el('div', 'grp-list choice-list');
       options.forEach(function (o, i) {
-        var b = el('button', 'opt');
+        var cell = el('div', 'cell');
+        var b = el('button', 'cell-btn');
         b.type = 'button';
-        b.append(el('b', null, String.fromCharCode(65 + i) + ':'), document.createTextNode(' ' + o));
-        b.addEventListener('click', function () { close(i); });
-        if (!first) first = b;
-        m.append(b);
+        b.append(el('b', null, String.fromCharCode(65 + i)), document.createTextNode(o));
+        b.addEventListener('click', function () { pick(i); });
+        cell.append(b);
+        list.append(cell);
       });
+      sheet.body.append(q, list);
       if (allowText) {
         var row = el('div', 'ask-row');
         var inp = el('input');
         inp.type = 'text';
+        inp.id = 'choice-text-' + sheetSeq;
         inp.placeholder = 'Oder selbst genauer beschreiben…';
         inp.setAttribute('aria-label', 'Selbst genauer beschreiben');
         inp.enterKeyHint = 'done';
         var ok = el('button', 'btn', 'OK');
         ok.type = 'button';
-        var submit = function () { var v = inp.value.trim(); if (v) close(v); };
+        var submit = function () { var v = inp.value.trim(); if (v) pick(v); };
         ok.addEventListener('click', submit);
         inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
         row.append(inp, ok);
-        m.append(row);
+        sheet.body.append(row);
       }
-      if (skipLabel) {
-        var s = el('button', 'opt ghost', skipLabel);
-        s.type = 'button';
-        s.addEventListener('click', function () { close(-1); });
-        m.append(s);
-      }
-      back.append(m);
-      document.body.append(back);
-      if (first) first.focus();
+      sheet.open();
     });
   }
   /* Tippfehler: Levenshtein-Abstand mit frühem Abbruch */

@@ -85,7 +85,13 @@
     var ta = el('td', 'act');
     if (ctx && ctx.edit) {
       var del = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      confirmTap(del, function () { applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; }); }, 'Lebensmittel löschen?', String(p.name || ''));
+      del.addEventListener('click', function () {
+        var before = mealDraft ? mealDraft.parts.slice() : null, key = mealDraft && mealDraft.key;
+        applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; });
+        if (before) undoToast(String(p.name || 'Lebensmittel') + ' entfernt.', function () {
+          if (mealDraft && mealDraft.key === key) { mealDraft.parts = before; render(true); }
+        });
+      });
       ta.append(del);
     }
     tr.append(ta);
@@ -98,41 +104,6 @@
     b.title = label;
     b.innerHTML = ICONS[name];
     return b;
-  }
-  /* Mülltonne: Popup mit Abbrechen | Löschen */
-  function askConfirm(title, text) {
-    return new Promise(function (resolve) {
-      var back = el('div', 'modal-back');
-      var m = el('div', 'modal');
-      m.setAttribute('role', 'alertdialog');
-      m.setAttribute('aria-modal', 'true');
-      m.setAttribute('aria-label', title);
-      m.append(el('h3', null, title));
-      if (text) m.append(el('p', 'note', text));
-      var row = el('div', 'ask-row');
-      var cancel = el('button', 'btn ghost', 'Abbrechen');
-      cancel.type = 'button';
-      var ok = el('button', 'btn danger', 'Löschen');
-      ok.type = 'button';
-      cancel.style.flex = '1';
-      ok.style.flex = '1';
-      function onKey(e) { if (e.key === 'Escape') close(false); }
-      function close(v) { document.removeEventListener('keydown', onKey); back.remove(); resolve(v); }
-      cancel.addEventListener('click', function () { close(false); });
-      ok.addEventListener('click', function () { close(true); });
-      back.addEventListener('click', function (e) { if (e.target === back) close(false); });
-      document.addEventListener('keydown', onKey);
-      row.append(cancel, ok);
-      m.append(row);
-      back.append(m);
-      document.body.append(back);
-      cancel.focus();
-    });
-  }
-  function confirmTap(btn, action, title, text) {
-    btn.addEventListener('click', async function () {
-      if (await askConfirm(title || 'Wirklich löschen?', text)) action();
-    });
   }
   function editCell(c, p, ctx) {
     if (c.calc && c.key !== 'gi') return numCell(c, p);

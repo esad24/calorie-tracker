@@ -1,0 +1,134 @@
+/* iOS layer: 16px fields, touch feedback, bottom sheets, inset grouped lists, lazy history paint */
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+button, label.btn, summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* Safari zooms the page into any field under 16px, so every field is at least 16px */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { font-size: 16px !important; }
+.q-in { width: 64px; }
+.mc-left .mc-dt { padding: 4px 8px; }
+
+/* Touch feedback; hover only where a real pointer hovers */
+.btn, .icon-btn, .nav-btn, .set-btn, .gear-btn, .pick-btn, .split button, .info-btn, .cell-btn, .sheet-cancel, .sheet-done, .toast-act, .more-btn {
+  transition: opacity 0.12s, background-color 0.15s;
+}
+.btn:active, .icon-btn:active, .nav-btn:active, .set-btn:active, .gear-btn:active, .pick-btn:active,
+.split button:active, .info-btn:active, .cell-btn:active, .sheet-cancel:active, .sheet-done:active, .toast-act:active, .more-btn:active { opacity: 0.55; }
+
+/* History: off-screen days skip layout and paint */
+.day { content-visibility: auto; contain-intrinsic-size: auto 52px; }
+.more-btn { align-self: center; margin-top: 14px; min-height: 44px; padding: 0 20px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+#history { display: flex; flex-direction: column; }
+
+/* Bottom sheet: scrim < sheet < toast */
+.sheet-back {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: transparent;
+  transition: background-color 0.32s;
+}
+.sheet-back.open { background: var(--scrim); }
+.sheet {
+  --kb: 0px;
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100% - max(env(safe-area-inset-top, 0px), 10px) - 34px);
+  display: flex;
+  flex-direction: column;
+  background: var(--sheet-bg);
+  color: var(--fg);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.22);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(.2, .9, .25, 1);
+  will-change: transform;
+}
+.sheet-back.open .sheet { transform: none; }
+.sheet.dragging { transition: none; }
+/* While typing, the sheet takes nearly the full height so the field stays above the keyboard */
+.sheet.typing { height: calc(100% - max(env(safe-area-inset-top, 0px), 10px) - 34px); }
+.sheet-grab { flex: none; height: 14px; display: flex; justify-content: center; align-items: flex-end; touch-action: none; cursor: grab; }
+.sheet-grab::before { content: ''; width: 36px; height: 5px; border-radius: 3px; background: var(--sep); }
+.sheet-head {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(64px, 1fr) minmax(0, auto) minmax(64px, 1fr);
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 2px 8px 6px;
+  touch-action: none;
+}
+.sheet-title { margin: 0; font-size: 17px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-cancel, .sheet-done { min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--accent); font: inherit; font-size: 17px; cursor: pointer; }
+.sheet-cancel { justify-self: start; }
+.sheet-done { justify-self: end; font-weight: 600; }
+.sheet-done[disabled] { opacity: 0.4; }
+.sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+}
+/* Safari drops bottom padding in scrolling flex boxes; a spacer child keeps the last row clear of the edge and keyboard */
+.sheet-body::after { content: ''; flex: none; height: calc(max(env(safe-area-inset-bottom, 0px), 20px) + var(--kb)); }
+.sheet-foot { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(max(env(safe-area-inset-bottom, 0px), 16px) + var(--kb)) max(16px, env(safe-area-inset-left, 0px)); border-top: 0.5px solid var(--sep); background: var(--sheet-bg); }
+.sheet:has(.sheet-foot) .sheet-body::after { height: 12px; }
+.sheet .note, .sheet .hint { color: var(--muted); }
+.sheet textarea, .sheet .pick-search, .sheet .ask-row input { background: var(--cell); border-color: transparent; border-radius: 10px; }
+@media (min-width: 700px) {
+  .sheet-back { align-items: center; padding: 24px; }
+  .sheet { border-radius: 14px; max-height: min(86vh, 860px); transform: translateY(16px) scale(0.98); opacity: 0; transition: transform 0.24s cubic-bezier(.2, .9, .25, 1), opacity 0.2s; }
+  .sheet-back.open .sheet { opacity: 1; }
+  .sheet-grab { visibility: hidden; height: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .sheet-back { transition-duration: 0.01s; }
+}
+
+/* Inset grouped list (Settings, choices) */
+.grp { display: flex; flex-direction: column; gap: 6px; }
+.grp-h { margin: 8px 16px 0; font-size: 13px; font-weight: 400; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+.grp-f { margin: 0 16px; font-size: 13px; line-height: 1.35; color: var(--muted); }
+.grp-list { background: var(--cell); border-radius: 12px; overflow: hidden; }
+.cell { position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 16px; box-sizing: border-box; }
+.cell + .cell::before { content: ''; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--sep); }
+.cell-l { flex: 1; min-width: 0; font-size: 16px; line-height: 1.25; }
+.cell-l small { display: block; font-size: 13px; color: var(--muted); }
+.cell-in { width: 6.5em; min-width: 0; padding: 8px 0; border: 0; background: transparent; color: var(--fg); font-family: inherit; text-align: right; font-variant-numeric: tabular-nums; }
+.cell-in::placeholder { color: var(--muted); opacity: 0.7; }
+.cell-in:focus { outline: none; }
+.cell-u { flex: none; min-width: 2.4em; color: var(--muted); font-size: 15px; }
+.cell select { max-width: 60%; padding: 8px 4px; border: 0; background: transparent; color: var(--muted); font-family: inherit; text-align: right; text-align-last: right; }
+.cell-btn { width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 16px; text-align: left; cursor: pointer; }
+.cell-btn.danger { color: var(--over); }
+.cell .ico { flex: none; width: 29px; height: 29px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 15px; font-weight: 700; }
+.cell:has(.ico) + .cell::before { left: 57px; }
+.ios-seg { display: flex; width: 100%; padding: 2px; border-radius: 9px; background: var(--seg-bg); box-sizing: border-box; }
+.ios-seg button { flex: 1 1 0; min-height: 32px; border: 0; border-radius: 7px; background: transparent; color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.ios-seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
+
+/* Choice sheet (questions during estimation) */
+.choice-list .cell-btn { color: var(--fg); display: flex; align-items: center; gap: 10px; padding: 10px 16px; line-height: 1.3; }
+.choice-list .cell-btn b { flex: none; width: 22px; color: var(--accent); font-weight: 600; }
+.sheet .ask-row .btn { flex: none; }
+.pick-foot { flex: 1; display: flex; align-items: center; gap: 10px; }
+.cell:has(> .cell-btn) { padding: 0; }
+.choice-q { margin: 2px 4px 0; font-size: 17px; font-weight: 600; line-height: 1.35; }
+.pick-sheet .pick-tools .ios-seg { flex: 1 1 100%; }
+.pick-sheet .pick-row { background: var(--cell); border-color: transparent; }
+.sheet .sheet-title, .sheet .choice-q { font-family: inherit; letter-spacing: -0.01em; }
+.sheet .pick-tools .u-sel { background: var(--cell); border-color: transparent; border-radius: 10px; }
