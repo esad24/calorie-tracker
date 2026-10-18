@@ -1,2 +1,4 @@
 dist/
 node_modules/
+# Personal export of the artifact database; never committed.
+data/db/

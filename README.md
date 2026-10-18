@@ -34,7 +34,7 @@ scripts/
   check.mjs         syntax-checks the built script
 data/
   bls.json          food reference table (BLS 4.0, Max Rubner-Institut, CC BY 4.0)
-  db/               export of the artifact database (days, foods, settings)
+  db/               local export of the artifact database (gitignored)
 ```
 
 The JS modules are plain scripts that share one scope: the build wraps them, in
@@ -55,7 +55,8 @@ file. The page needs the artifact runtime capabilities `db`, `sample`, `mcp`
 
 ## Data
 
-`data/db/` mirrors the artifact database, one JSON file per document:
+`data/db/` (gitignored, kept out of this public repo) mirrors the artifact
+database, one JSON file per document:
 
 - `days/<YYYY-MM-DD>.json` – meals (with per-food `parts`), water, coffee, cola, `cafLog`
 - `foods/<key>.json` – saved foods with values per 100 g
