@@ -1,0 +1,166 @@
+<title>Calorie Log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* build:css */
+</style>
+
+<main class="page">
+  <header>
+    <div class="topbar">
+      <button type="button" class="gear-btn" id="open-settings" aria-label="Einstellungen" title="Einstellungen" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+    <nav class="daynav" aria-label="Tag wechseln">
+      <button type="button" class="nav-btn" id="prev" aria-label="Vorheriger Tag">‹</button>
+      <button type="button" class="daylabel" id="daylabel"><span class="eyebrow" id="rel-label">Heute</span><span class="daydate" id="day-date"></span></button>
+      <button type="button" class="nav-btn" id="next" aria-label="Nächster Tag">›</button>
+    </nav>
+    <div class="hero-card">
+      <div class="ring progress" id="progress" role="progressbar" aria-label="Fortschritt zum Tagesbedarf" aria-valuemin="0" aria-valuemax="2100" aria-valuenow="0">
+        <svg viewBox="0 0 150 150" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringgrad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stop-color="#22D3EE"></stop>
+              <stop offset="0.55" stop-color="#4F7CFF"></stop>
+              <stop offset="1" stop-color="#A78BFA"></stop>
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="75" cy="75" r="64"></circle>
+          <circle class="ring-fill" id="progress-fill" cx="75" cy="75" r="64" stroke-dasharray="0 402.1" transform="rotate(-90 75 75)"></circle>
+        </svg>
+        <div class="ring-center">
+          <p class="hero" id="hero"><span id="today-total">—</span></p>
+          <span class="unit">kcal</span>
+        </div>
+      </div>
+      <div class="hero-info">
+        <div class="sub" id="today-sub">Lade dein Protokoll…</div>
+        <div class="hero-water" id="hero-water"></div>
+      </div>
+      <dl class="hero-stats" id="hero-stats"></dl>
+    </div>
+  </header>
+
+  <div class="modal-back" id="settings" hidden>
+    <div class="set-modal" role="dialog" aria-modal="true" aria-labelledby="h-set">
+      <div class="set-head"><h2 id="h-set">Einstellungen</h2></div>
+      <div class="set-body">
+        <fieldset class="set-group">
+          <legend class="set-sub">Darstellung</legend>
+          <div class="seg" id="theme-seg"></div>
+        </fieldset>
+        <fieldset class="set-group">
+          <legend class="set-sub">Schätz-Modell</legend>
+          <select class="u-sel tier-sel" id="model-tier" aria-label="Modell für die Schätzung">
+            <option value="haiku">Haiku · schnell</option>
+            <option value="sonnet">Sonnet · ausgewogen</option>
+            <option value="opus">Opus · am genauesten</option>
+          </select>
+        </fieldset>
+        <fieldset class="set-group">
+          <legend class="set-sub">Tagesziele und Grenzen</legend>
+          <div class="set-lh"><button type="button" class="info-btn" aria-label="Info anzeigen" aria-expanded="false">i</button><span class="hint">Was bedeuten die Werte?</span><p class="note info-text" hidden>Leer lassen, wenn du für einen Wert kein Ziel willst. Zucker und Salz sind Obergrenzen, die übrigen Werte Zielmengen. Bei der glykämischen Last (GL) bestimmst du die Tagesgrenzen für „niedrig“ und „mittel“; die Grenzen pro Mahlzeit sind ein Drittel davon. Koffein ist eine Obergrenze. Das Körpergewicht wird für die ADI-Anzeige der Süßungsmittel genutzt. Bei Na:K steht x für Kalium geteilt durch Natrium; ab dem „gut“-Wert gilt das Verhältnis als gut, ab dem „mittel“-Wert als mittel.</p></div>
+          <div class="goal-grid" id="goal-grid"></div>
+        </fieldset>
+        <fieldset class="set-group">
+          <legend class="set-sub">Kalorien-Saldo</legend>
+          <div class="goal">
+            <label for="g-bal">Saldo zu Beginn von heute (kcal, minus = Defizit)</label>
+            <input type="number" id="g-bal" step="1" inputmode="numeric">
+          </div>
+          <p class="note">Wird ab heute weitergerechnet. 0 setzt den Saldo zurück.</p>
+        </fieldset>
+        <fieldset class="set-group" id="export-group">
+          <legend class="set-sub">Daten exportieren</legend>
+          <div class="row">
+            <button type="button" class="btn ghost" id="export-csv">Als CSV (Tabelle)</button>
+            <button type="button" class="btn ghost" id="export-json">Als JSON (Backup)</button>
+          </div>
+          <p class="note">CSV: eine Zeile pro Lebensmittel, für Excel oder Sheets. JSON: alle Tage, Ziele, Favoriten und gespeicherten Lebensmittel.</p>
+        </fieldset>
+        <fieldset class="set-group">
+          <legend class="set-sub">Zugriff</legend>
+          <div><button type="button" class="btn ghost" id="manage-perms">Berechtigungen verwalten</button></div>
+        </fieldset>
+      </div>
+      <div class="set-foot">
+        <button type="button" class="btn" id="save-goals">Speichern</button>
+        <button type="button" class="btn ghost" id="close-settings">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="composer" aria-labelledby="h-add">
+    <h2 id="h-add">Mahlzeit hinzufügen</h2>
+    <div class="info c"><button type="button" class="info-btn corner" aria-label="Info anzeigen" aria-expanded="false">i</button><p class="note info-text" hidden>Du kannst Mahlzeiten auch im Chat bei Claude eintragen.</p></div>
+    <textarea id="meal-input" aria-label="Was hast du gegessen?" rows="3" placeholder="150 g Haferflocken, 250 ml Milch, 1 Banane (120 g)"></textarea>
+    <p class="for-day" id="for-day"></p>
+    <div class="row" id="add-banner" hidden><span class="hint" id="add-banner-text"></span><button type="button" class="btn ghost" id="add-cancel">Abbrechen</button></div>
+    <div class="row">
+      <button type="button" class="btn" id="estimate">Schätzen</button>
+      <label class="btn ghost" for="scan-file" id="scan-label" title="Barcode scannen" aria-label="Barcode scannen" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;box-sizing:border-box"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><rect x="3" y="5" width="2" height="14"/><rect x="7" y="5" width="1" height="14"/><rect x="10" y="5" width="3" height="14"/><rect x="15" y="5" width="1" height="14"/><rect x="18" y="5" width="3" height="14"/></svg></label>
+      <input type="file" id="scan-file" accept="image/*" capture="environment" aria-label="Barcode fotografieren" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+      <label class="btn ghost" for="nut-file" id="nut-label" title="Foto: Nährwerttabelle oder Mahlzeit" aria-label="Foto von Nährwerttabelle oder Mahlzeit" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;box-sizing:border-box"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></label>
+      <input type="file" id="nut-file" accept="image/*" capture="environment" aria-label="Nährwerttabelle fotografieren" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+    </div>
+    <div class="row">
+      <button type="button" class="btn ghost" id="open-recent">↺ Vergangene</button>
+      <button type="button" class="btn ghost" id="open-favs">★ Favoriten</button>
+    </div>
+    <div class="preview" id="preview" hidden></div>
+  </section>
+
+  <section class="composer" aria-labelledby="h-water">
+    <h2 id="h-water">Wasser</h2>
+    <div id="water" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
+
+  <section class="composer" aria-labelledby="h-coffee">
+    <h2 id="h-coffee">Kaffee</h2>
+    <div id="coffee" style="display:flex;flex-direction:column;gap:8px"></div>
+  </section>
+
+  <section aria-labelledby="h-nuts">
+    <h2 id="h-nuts">Tag gesamt</h2>
+    <div id="nuts"></div>
+    <div id="glcard"></div>
+  </section>
+
+  <section aria-labelledby="h-today">
+    <h2 id="h-today">Mahlzeiten</h2>
+    <div class="cards" id="meals"></div>
+    <p class="empty" id="meals-empty" hidden>Noch nichts eingetragen. Füge oben deine erste Mahlzeit hinzu.</p>
+  </section>
+
+  <section aria-labelledby="h-caft">
+    <h2 id="h-caft">Koffein</h2>
+    <div class="cards" id="caf-table"></div>
+  </section>
+
+  <section aria-labelledby="h-chart">
+    <div class="head">
+      <h2 id="h-chart">Letzte 30 Tage</h2>
+      <dl class="stats">
+        <div><dt>Ø der letzten 7 vollen Tage</dt><dd id="avg7">—</dd></div>
+        <div><dt>Tage erfasst</dt><dd id="logged">—</dd></div>
+      </dl>
+    </div>
+    <div class="chart" id="chart"></div>
+    <p class="readout" id="readout" aria-live="polite"></p>
+  </section>
+
+  <section aria-labelledby="h-history">
+    <h2 id="h-history">Frühere Tage</h2>
+    <div id="history"></div>
+    <p class="empty" id="history-empty" hidden>Tage vor heute erscheinen hier, die neuesten zuerst.</p>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+/* build:js */
+</script>
