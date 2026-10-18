@@ -1,7 +1,6 @@
 <title>Calorie Log</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: one column. Day navigation and the day's calories lead, then the add-a-meal card, the day's nutrient totals, one table card per meal (food rows with editable amount and unit, plus a meal total), a 30-day chart with a target line, and a history of earlier days in the same table form. */
 :root {
@@ -18,9 +17,10 @@
   --ring-1: #22D3EE;
   --ring-2: #4F7CFF;
   --ring-3: #A78BFA;
-  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+  /* Apple system font only (SF Pro on Apple devices); digits line up through tabular figures, not a mono face */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: var(--font-body);
   --edge: rgba(255, 255, 255, 0.06);
   --good: #34D399;
   --warn: #F59E5B;
@@ -85,6 +85,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
   font-size: 16px;
   line-height: 1.45;
 }
@@ -473,7 +474,7 @@ textarea {
 .composer, .glcard { position: relative; }
 .info-btn.corner { position: absolute; top: 12px; right: 12px; }
 .composer h2, .gl-title { padding-right: 34px; }
-.info-btn { flex: none; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--muted) 80%, var(--bg)); background: transparent; color: color-mix(in srgb, var(--fg) 78%, var(--bg)); font: 700 13px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.info-btn { flex: none; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--muted) 80%, var(--bg)); background: transparent; color: color-mix(in srgb, var(--fg) 78%, var(--bg)); font: 700 13px/1 var(--font-body); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .info-btn[aria-expanded="true"] { background: var(--muted); color: var(--bg); }
 .info-btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 .ctable { min-width: 0; table-layout: auto; }
@@ -597,7 +598,7 @@ textarea {
   border-radius: 14px;
   background: var(--fg);
   color: var(--bg);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.3;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
@@ -732,6 +733,8 @@ textarea {
 /* iOS layer: 16px fields, touch feedback, bottom sheets, inset grouped lists, lazy history paint */
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
+/* Controls do not inherit the page font by default; every text uses the Apple system font */
+button, input, select, textarea, optgroup { font-family: inherit; }
 button, label.btn, summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 /* Safari zooms the page into any field under 16px, so every field is at least 16px */
@@ -775,7 +778,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
   color: var(--fg);
   border-radius: 14px 14px 0 0;
   box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.22);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   transform: translateY(100%);
   transition: transform 0.32s cubic-bezier(.2, .9, .25, 1);
@@ -863,6 +866,9 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
 .pick-sheet .pick-row { background: var(--cell); border-color: transparent; }
 .sheet .sheet-title, .sheet .choice-q { font-family: inherit; letter-spacing: -0.01em; }
 .sheet .pick-tools .u-sel { background: var(--cell); border-color: transparent; border-radius: 10px; }
+/* Delete confirmation */
+.confirm-q, .confirm-text { text-align: center; }
+.confirm-del { text-align: center; font-weight: 600; }
 </style>
 
 <main class="page">
@@ -1290,6 +1296,32 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
     ctl.cancelBtn = o.cancel ? cancel : null;
     ctl.addFoot = function () { var f = el('div', 'sheet-foot'); sh.append(f); return f; };
     return ctl;
+  }
+
+  /* Delete safety, step one (step two is the Undo toast): an iOS action sheet. Resolves true only for Löschen;
+     Abbrechen, pulling down, the scrim and Escape all keep the entry. */
+  function askConfirm(title, text) {
+    return new Promise(function (resolve) {
+      var ok = false;
+      var sheet = makeSheet({ title: '', cancel: 'Abbrechen', role: 'alertdialog', onDismiss: function () { resolve(ok); } });
+      sheet.sheet.setAttribute('aria-label', title);
+      sheet.body.append(el('h3', 'choice-q confirm-q', title));
+      if (text) sheet.body.append(el('p', 'grp-f confirm-text', text));
+      var list = el('div', 'grp-list');
+      var cell = el('div', 'cell');
+      var del = el('button', 'cell-btn danger confirm-del', 'Löschen');
+      del.type = 'button';
+      del.addEventListener('click', function () { ok = true; sheet.close('done'); });
+      cell.append(del);
+      list.append(cell);
+      sheet.body.append(list);
+      sheet.open();
+    });
+  }
+  function confirmTap(btn, action, title, text) {
+    btn.addEventListener('click', async function () {
+      if (await askConfirm(title || 'Wirklich löschen?', text)) action();
+    });
   }
 
   /* Pull down to close: from the grabber or title bar at once, from the content only when it is scrolled to the top.
@@ -1723,13 +1755,13 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
     var ta = el('td', 'act');
     if (ctx && ctx.edit) {
       var del = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      del.addEventListener('click', function () {
+      confirmTap(del, function () {
         var before = mealDraft ? mealDraft.parts.slice() : null, key = mealDraft && mealDraft.key;
         applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; });
         if (before) undoToast(String(p.name || 'Lebensmittel') + ' entfernt.', function () {
           if (mealDraft && mealDraft.key === key) { mealDraft.parts = before; render(true); }
         });
-      });
+      }, 'Lebensmittel löschen?', String(p.name || ''));
       ta.append(del);
     }
     tr.append(ta);
@@ -1889,7 +1921,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
     pen.disabled = !editable;
     pen.addEventListener('click', function () { editKey = edit ? null : mkey; mealDraft = null; render(true); });
     var rm = iconBtn('trash', 'Mahlzeit entfernen', '');
-    rm.addEventListener('click', function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); });
+    confirmTap(rm, function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); }, 'Mahlzeit löschen?', 'Alle Lebensmittel dieser Mahlzeit werden entfernt.');
     var fav = isFav(mealKeyOf(m));
     var star = iconBtn('star', fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen', fav ? 'fav-on' : '');
     star.setAttribute('aria-pressed', String(fav));
@@ -2827,7 +2859,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
       var tdA = el('td', 'act');
       if (edit) {
         var del = iconBtn('trash', 'Eintrag entfernen', 'row-del');
-        del.addEventListener('click', function () {
+        confirmTap(del, function () {
           del.disabled = true;
           var snapshot = cafDraft ? JSON.parse(JSON.stringify(cafDraft)) : null;
           undoToast('Eintrag entfernt.', function () {
@@ -2844,7 +2876,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
               st.log.splice(r._i, 1);
             }
           });
-        });
+        }, 'Eintrag löschen?', 'Menge und Koffein werden vom Tag abgezogen.');
         tdA.append(del);
       }
       tr.append(tdT, tdK, tdM, tdG, tdA);
@@ -3516,14 +3548,14 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
       });
       var tdAct = el('td', 'act');
       var rdel = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      rdel.addEventListener('click', function () {
+      confirmTap(rdel, function () {
         var removed = p;
         removeRow(i);
         undoToast(String(removed.name || 'Lebensmittel') + ' entfernt.', function () {
           parts.splice(Math.min(i, parts.length), 0, removed);
           showPreview(parts, note);
         });
-      });
+      }, 'Lebensmittel entfernen?', String(p.name || ''));
       tdAct.append(rdel);
       tr.append(tdAct);
       body.append(tr);
@@ -3896,7 +3928,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, tex
   function renderThemeSeg() {
     var seg = $('theme-seg');
     seg.replaceChildren();
-    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'Automatisch']].forEach(function (o) {
+    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'System']].forEach(function (o) {
       var b = el('button', null, o[1]);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(themeDraft === o[0]));

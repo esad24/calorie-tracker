@@ -31,7 +31,7 @@
 .composer, .glcard { position: relative; }
 .info-btn.corner { position: absolute; top: 12px; right: 12px; }
 .composer h2, .gl-title { padding-right: 34px; }
-.info-btn { flex: none; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--muted) 80%, var(--bg)); background: transparent; color: color-mix(in srgb, var(--fg) 78%, var(--bg)); font: 700 13px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.info-btn { flex: none; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--muted) 80%, var(--bg)); background: transparent; color: color-mix(in srgb, var(--fg) 78%, var(--bg)); font: 700 13px/1 var(--font-body); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .info-btn[aria-expanded="true"] { background: var(--muted); color: var(--bg); }
 .info-btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 .ctable { min-width: 0; table-layout: auto; }
@@ -155,7 +155,7 @@
   border-radius: 14px;
   background: var(--fg);
   color: var(--bg);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.3;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);

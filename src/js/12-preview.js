@@ -151,14 +151,14 @@
       });
       var tdAct = el('td', 'act');
       var rdel = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      rdel.addEventListener('click', function () {
+      confirmTap(rdel, function () {
         var removed = p;
         removeRow(i);
         undoToast(String(removed.name || 'Lebensmittel') + ' entfernt.', function () {
           parts.splice(Math.min(i, parts.length), 0, removed);
           showPreview(parts, note);
         });
-      });
+      }, 'Lebensmittel entfernen?', String(p.name || ''));
       tdAct.append(rdel);
       tr.append(tdAct);
       body.append(tr);

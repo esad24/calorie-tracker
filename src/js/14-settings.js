@@ -22,7 +22,7 @@
   function renderThemeSeg() {
     var seg = $('theme-seg');
     seg.replaceChildren();
-    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'Automatisch']].forEach(function (o) {
+    [['light', 'Hell'], ['dark', 'Dunkel'], ['system', 'System']].forEach(function (o) {
       var b = el('button', null, o[1]);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(themeDraft === o[0]));

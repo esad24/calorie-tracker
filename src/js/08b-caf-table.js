@@ -154,7 +154,7 @@
       var tdA = el('td', 'act');
       if (edit) {
         var del = iconBtn('trash', 'Eintrag entfernen', 'row-del');
-        del.addEventListener('click', function () {
+        confirmTap(del, function () {
           del.disabled = true;
           var snapshot = cafDraft ? JSON.parse(JSON.stringify(cafDraft)) : null;
           undoToast('Eintrag entfernt.', function () {
@@ -171,7 +171,7 @@
               st.log.splice(r._i, 1);
             }
           });
-        });
+        }, 'Eintrag löschen?', 'Menge und Koffein werden vom Tag abgezogen.');
         tdA.append(del);
       }
       tr.append(tdT, tdK, tdM, tdG, tdA);

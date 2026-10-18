@@ -23,7 +23,7 @@
     pen.disabled = !editable;
     pen.addEventListener('click', function () { editKey = edit ? null : mkey; mealDraft = null; render(true); });
     var rm = iconBtn('trash', 'Mahlzeit entfernen', '');
-    rm.addEventListener('click', function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); });
+    confirmTap(rm, function () { rm.disabled = true; editKey = null; mealDraft = null; removeMeal(date, m); }, 'Mahlzeit löschen?', 'Alle Lebensmittel dieser Mahlzeit werden entfernt.');
     var fav = isFav(mealKeyOf(m));
     var star = iconBtn('star', fav ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen', fav ? 'fav-on' : '');
     star.setAttribute('aria-pressed', String(fav));

@@ -85,13 +85,13 @@
     var ta = el('td', 'act');
     if (ctx && ctx.edit) {
       var del = iconBtn('trash', 'Lebensmittel entfernen', 'row-del');
-      del.addEventListener('click', function () {
+      confirmTap(del, function () {
         var before = mealDraft ? mealDraft.parts.slice() : null, key = mealDraft && mealDraft.key;
         applyEdit(ctx.date, ctx.meal, p, function () { return { remove: true }; });
         if (before) undoToast(String(p.name || 'Lebensmittel') + ' entfernt.', function () {
           if (mealDraft && mealDraft.key === key) { mealDraft.parts = before; render(true); }
         });
-      });
+      }, 'Lebensmittel löschen?', String(p.name || ''));
       ta.append(del);
     }
     tr.append(ta);

@@ -13,9 +13,10 @@
   --ring-1: #22D3EE;
   --ring-2: #4F7CFF;
   --ring-3: #A78BFA;
-  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+  /* Apple system font only (SF Pro on Apple devices); digits line up through tabular figures, not a mono face */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: var(--font-body);
   --edge: rgba(255, 255, 255, 0.06);
   --good: #34D399;
   --warn: #F59E5B;
@@ -80,6 +81,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
   font-size: 16px;
   line-height: 1.45;
 }

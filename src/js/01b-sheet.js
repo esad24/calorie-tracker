@@ -81,6 +81,32 @@
     return ctl;
   }
 
+  /* Delete safety, step one (step two is the Undo toast): an iOS action sheet. Resolves true only for Löschen;
+     Abbrechen, pulling down, the scrim and Escape all keep the entry. */
+  function askConfirm(title, text) {
+    return new Promise(function (resolve) {
+      var ok = false;
+      var sheet = makeSheet({ title: '', cancel: 'Abbrechen', role: 'alertdialog', onDismiss: function () { resolve(ok); } });
+      sheet.sheet.setAttribute('aria-label', title);
+      sheet.body.append(el('h3', 'choice-q confirm-q', title));
+      if (text) sheet.body.append(el('p', 'grp-f confirm-text', text));
+      var list = el('div', 'grp-list');
+      var cell = el('div', 'cell');
+      var del = el('button', 'cell-btn danger confirm-del', 'Löschen');
+      del.type = 'button';
+      del.addEventListener('click', function () { ok = true; sheet.close('done'); });
+      cell.append(del);
+      list.append(cell);
+      sheet.body.append(list);
+      sheet.open();
+    });
+  }
+  function confirmTap(btn, action, title, text) {
+    btn.addEventListener('click', async function () {
+      if (await askConfirm(title || 'Wirklich löschen?', text)) action();
+    });
+  }
+
   /* Pull down to close: from the grabber or title bar at once, from the content only when it is scrolled to the top.
      The first pull with the keyboard up only dismisses the keyboard. */
   function attachPull(ctl) {

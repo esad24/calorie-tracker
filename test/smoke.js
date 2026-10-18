@@ -68,6 +68,12 @@ async function phoneChecks(browser, scheme) {
   await p.screenshot({ path: path.join(SHOTS, tag + '-top.png') });
 
   check(tag + ': no horizontal page overflow', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  const fonts = await p.evaluate(() => {
+    const bad = new Set();
+    document.querySelectorAll('body *').forEach((e) => { const f = getComputedStyle(e).fontFamily; if (!/^-apple-system/.test(f)) bad.add(f); });
+    return { bad: [...bad], links: document.querySelectorAll('link[href*="fonts.googleapis"]').length };
+  });
+  check(tag + ': only Apple system fonts', fonts.bad.length === 0 && fonts.links === 0, fonts.bad.slice(0, 3).join(' | '));
   check(tag + ': nutrient tables scroll on one axis', await p.evaluate(() => [...document.querySelectorAll('.tbl-wrap')].every((w) => getComputedStyle(w).overflowY === 'hidden')));
 
   // Navigation timing (each click renders synchronously)
@@ -101,12 +107,23 @@ async function phoneChecks(browser, scheme) {
   check(tag + ': next field keeps focus after an edit', after.active === ids[1], 'active ' + after.active);
   await p.screenshot({ path: path.join(SHOTS, tag + '-edit.png') });
 
-  // Delete the meal from edit mode, then Undo
+  // Delete the meal from edit mode: confirm sheet first (Abbrechen keeps it), then Löschen, then Undo
   const before = await p.evaluate(() => document.querySelectorAll('#meals .meal-card').length);
   await p.click('#meals .meal-card .mc-actions button[aria-label="Mahlzeit entfernen"]');
+  await p.waitForSelector('.sheet .confirm-del', { timeout: 3000 }).catch(() => {});
+  check(tag + ': delete asks "Mahlzeit löschen?" first', await p.evaluate(() => /Mahlzeit löschen\?/.test((document.querySelector('.sheet .confirm-q') || {}).textContent || '')));
+  await p.waitForTimeout(400);
+  await p.screenshot({ path: path.join(SHOTS, tag + '-confirm.png') });
+  await p.click('.sheet-back.open .sheet-cancel');
+  await p.waitForTimeout(450);
+  check(tag + ': Abbrechen keeps the meal', await p.evaluate(() => document.querySelectorAll('#meals .meal-card').length) === before);
+  await p.click('#meals .meal-card .mc-actions button[aria-label="Mahlzeit entfernen"]');
+  await p.waitForSelector('.sheet-back.open .confirm-del', { timeout: 3000 });
+  await p.waitForTimeout(350);
+  await p.click('.sheet-back.open .confirm-del');
   await p.waitForFunction((n) => document.querySelectorAll('#meals .meal-card').length === n - 1, before, { timeout: 3000 }).catch(() => {});
   const gone = await p.evaluate(() => document.querySelectorAll('#meals .meal-card').length);
-  check(tag + ': meal deletes without a confirm dialog', gone === before - 1, before + ' -> ' + gone);
+  check(tag + ': Löschen deletes the meal', gone === before - 1, before + ' -> ' + gone);
   const undo = await p.$('#toast .toast-act');
   check(tag + ': delete offers Undo', !!undo && await undo.isVisible());
   await p.screenshot({ path: path.join(SHOTS, tag + '-undo.png') });

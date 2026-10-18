@@ -14,11 +14,12 @@ UI text is German. Code comments are German in older parts, English in newer one
 `src/index.html` lists every include in order. That order is the cascade order for CSS and the top-to-bottom order of one shared JS scope (everything runs inside one IIFE), so a `var` used by top-level code must come from an earlier file.
 
 - `src/markup.html`: page markup, the Settings sheet and the toast.
+- Fonts: Apple system font only (SF Pro via `-apple-system`), for everything including descriptions and numbers. No web fonts and no mono face; digits align with `tabular-nums`. All controls inherit the font.
 - `src/css/01-base.css`: tokens. Dark-first: dark values on bare `:root`; light values twice (`prefers-color-scheme: light` guard and `[data-theme="light"]`), keep both in sync. iOS surface tokens (`--sheet-bg`, `--cell`, `--sep`, `--seg-*`, `--scrim`, `--toast-act`) live here too.
 - `src/css/02…05`: the original content styles (hero, tables, composer, trackers, chart, history, mobile tweaks).
 - `src/css/06-ios.css`: the iOS layer. 16px minimum on fields, touch feedback, sheets, inset grouped lists, segmented control, lazy history paint.
 - `src/js/01-state.js`: constants, columns, state, write queue (`dbTask` with retries), formatters (cached `Intl`), `toast` / `undoToast`.
-- `src/js/01b-sheet.js`: bottom sheets. `sheetCtl(back, {keep, onDismiss})` wires existing markup (Settings); `makeSheet({title, cancel, done, onDone, onDismiss})` builds one. Handles the slide animation, scrim, Escape, pull to close and keyboard (`--kb`).
+- `src/js/01b-sheet.js`: bottom sheets and the delete confirmation. `sheetCtl(back, {keep, onDismiss})` wires existing markup (Settings); `makeSheet({title, cancel, done, onDone, onDismiss})` builds one. Handles the slide animation, scrim, Escape, pull to close and keyboard (`--kb`).
 - `src/js/02-data.js`: amounts and units, meal values, GL and Na:K, `removeMeal` / `restoreMeal` (Undo), draft edits (`applyEdit`).
 - `src/js/03-tables.js`, `04-meal-card.js`: nutrient tables and meal cards, including edit mode.
 - `src/js/05-view-today.js`, `06-chart-history.js`: hero, chips, GL card, 30-day chart, paged lazy history.
@@ -43,7 +44,7 @@ UI text is German. Code comments are German in older parts, English in newer one
 
 - Writes go through `dbTask`: one at a time, re-read before write, 20 s timeout, up to 3 retries on `unavailable` and `resource_exhausted`. `quota_exceeded` shows a plain message.
 - Edits commit on `change` but rebuild only after the pointer is up (`afterTap`), so the tap that moved focus or hit Speichern still lands. `render()` keeps each keyed table's horizontal scroll (`data-k`) and the focused field (by id).
-- Deletes (meal, draft rows, caffeine rows, preview rows) happen at once with an Undo toast. There are no confirm dialogs.
+- Deletes (meal, draft rows, caffeine rows, preview rows) have two safety steps: a "… löschen?" action sheet (`askConfirm` / `confirmTap` in `01b-sheet.js`), then an Undo toast. The owner wants both; keep them.
 - History shows 60 days and loads more near the end. A day's tables are built only when it is opened.
 - Day swipe: more than 60 px and 1.6× more horizontal than vertical, not from fields, tables, chart, history, preview or sheets.
 
