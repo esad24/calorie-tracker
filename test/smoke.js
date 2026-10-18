@@ -76,6 +76,34 @@ async function phoneChecks(browser, scheme) {
   check(tag + ': only Apple system fonts', fonts.bad.length === 0 && fonts.links === 0, fonts.bad.slice(0, 3).join(' | '));
   check(tag + ': nutrient tables scroll on one axis', await p.evaluate(() => [...document.querySelectorAll('.tbl-wrap')].every((w) => getComputedStyle(w).overflowY === 'hidden')));
 
+  // Saldo marks on the calorie ring: anchor the balance at today so the budget is exact
+  async function setBalance(balVal) {
+    await p.evaluate(async (balVal) => {
+      const db = await window.claude.use('db');
+      const g = (await db.doc('settings/goals').get()).data();
+      const d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      await db.doc('settings/goals').set(Object.assign(g, { balFrom: k, balVal }));
+    }, balVal);
+    await p.waitForTimeout(150);
+    return p.evaluate(() => {
+      const ang = (id) => {
+        const g = document.getElementById(id);
+        if (g.hasAttribute('hidden')) return null;
+        const l = g.querySelector('.tick'), x = +l.getAttribute('x2') - 75, y = 75 - +l.getAttribute('y2');
+        return ((Math.atan2(x, y) / (2 * Math.PI)) + 1) % 1;
+      };
+      return { saldo: ang('ring-saldo'), base: ang('ring-base') };
+    });
+  }
+  const surplus = await setBalance(300); // budget 1800 of 2100
+  check(tag + ': surplus puts the red mark at the budget', surplus.saldo != null && Math.abs(surplus.saldo - 1800 / 2100) < 0.01 && surplus.base == null, JSON.stringify(surplus));
+  await p.screenshot({ path: path.join(SHOTS, tag + '-saldo-surplus.png'), clip: { x: 0, y: 140, width: 402, height: 400 } });
+  const deficit = await setBalance(-400); // budget 2500: ring reaches the budget, grey mark at 2100
+  check(tag + ': deficit puts red mark at ring end, grey at daily need', deficit.saldo != null && (deficit.saldo < 0.01 || deficit.saldo > 0.99) && Math.abs(deficit.base - 2100 / 2500) < 0.01, JSON.stringify(deficit));
+  await p.screenshot({ path: path.join(SHOTS, tag + '-saldo-deficit.png'), clip: { x: 0, y: 140, width: 402, height: 400 } });
+  const none = await setBalance(0);
+  check(tag + ': no marks without a balance', none.saldo == null && none.base == null, JSON.stringify(none));
+
   // Navigation timing (each click renders synchronously)
   const ms = await p.evaluate(() => {
     const t0 = performance.now();

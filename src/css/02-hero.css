@@ -150,3 +150,10 @@ h2 {
 .chip-label { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
 .chip-val { font-family: var(--font-mono); font-size: 17px; font-variant-numeric: tabular-nums; }
 
+/* Saldo-Strich (rot) und Tagesbedarf-Strich (grau) quer über dem Ring; der Halo trennt sie von der Füllung */
+.ring svg { overflow: visible; }
+.ring-mark line { stroke-linecap: round; }
+.ring-mark .halo { stroke: var(--panel); stroke-width: 7.5; }
+.ring-mark .tick { stroke-width: 3.5; }
+.ring-mark.saldo .tick { stroke: var(--over); }
+.ring-mark.base .tick { stroke: var(--muted); }

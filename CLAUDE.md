@@ -45,6 +45,7 @@ UI text is German. Code comments are German in older parts, English in newer one
 - Writes go through `dbTask`: one at a time, re-read before write, 20 s timeout, up to 3 retries on `unavailable` and `resource_exhausted`. `quota_exceeded` shows a plain message.
 - Edits commit on `change` but rebuild only after the pointer is up (`afterTap`), so the tap that moved focus or hit Speichern still lands. `render()` keeps each keyed table's horizontal scroll (`data-k`) and the focused field (by id).
 - Deletes (meal, draft rows, caffeine rows, preview rows) have two safety steps: a "… löschen?" action sheet (`askConfirm` / `confirmTap` in `01b-sheet.js`), then an Undo toast. The owner wants both; keep them.
+- Calorie ring with a balance (Saldo ≠ 0): red mark at the budget (Tagesbedarf − Saldo), where today must end for the balance to be 0. With a deficit the budget exceeds the daily need, so the ring then spans the budget (red mark at its end) and a grey mark shows the daily need. `placeRingMark` in `05-view-today.js`.
 - History shows 60 days and loads more near the end. A day's tables are built only when it is opened.
 - Day swipe: more than 60 px and 1.6× more horizontal than vertical, not from fields, tables, chart, history, preview or sheets.
 

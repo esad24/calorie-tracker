@@ -106,6 +106,19 @@
     var f = Math.max(0, Math.min(1, p)) * c;
     $('progress-fill').setAttribute('stroke-dasharray', f.toFixed(1) + ' ' + c);
   }
+  /* Strich quer über den Ring bei frac (0..1, ab 12 Uhr im Uhrzeigersinn); null blendet ihn aus */
+  function placeRingMark(id, frac) {
+    var g = $(id);
+    if (frac == null) { g.setAttribute('hidden', ''); return; }
+    var a = Math.max(0, Math.min(1, frac)) * 2 * Math.PI, s = Math.sin(a), c = Math.cos(a);
+    g.querySelectorAll('line').forEach(function (ln) {
+      ln.setAttribute('x1', (75 + 53 * s).toFixed(2));
+      ln.setAttribute('y1', (75 - 53 * c).toFixed(2));
+      ln.setAttribute('x2', (75 + 75 * s).toFixed(2));
+      ln.setAttribute('y2', (75 - 75 * c).toFixed(2));
+    });
+    g.removeAttribute('hidden');
+  }
   function renderToday(view, today, day) {
     var box = $('meals');
     var keepMeals = lockMeals() && box.children.length > 0;
@@ -120,6 +133,8 @@
     hero.classList.remove('over');
     prog.classList.remove('over');
     setRing(0);
+    placeRingMark('ring-saldo', null);
+    placeRingMark('ring-base', null);
     prog.setAttribute('aria-valuenow', '0');
     prog.setAttribute('aria-valuemax', String(TARGET));
     if (status !== 'ready') {
@@ -134,8 +149,20 @@
     var meals = mealsOf(day);
     var t = dayTotals(day);
     $('today-total').textContent = fmtN(t.kcal);
-    setRing(t.kcal / TARGET);
+    /* Saldo: roter Strich dort, wo der Tag enden muss, damit der Saldo 0 wird (Budget = Tagesbedarf − Saldo).
+       Liegt das Budget über dem Tagesbedarf (Defizit), reicht der Ring bis zum Budget und ein grauer Strich
+       zeigt den normalen Tagesbedarf. */
+    var bal = balanceBefore(view);
+    var carry = bal.n > 0 ? round50(bal.sum) : 0;
+    var budget = Math.max(0, TARGET - carry);
+    var scale = carry ? Math.max(TARGET, budget) : TARGET;
+    setRing(t.kcal / scale);
+    placeRingMark('ring-saldo', carry ? budget / scale : null);
+    placeRingMark('ring-base', carry && budget > TARGET ? TARGET / scale : null);
+    prog.setAttribute('aria-valuemax', String(Math.round(scale)));
     prog.setAttribute('aria-valuenow', String(Math.round(t.kcal)));
+    if (carry) prog.setAttribute('aria-valuetext', fmtN(t.kcal) + ' kcal, Saldo 0 bei ' + fmtN(budget) + ' kcal');
+    else prog.removeAttribute('aria-valuetext');
     var left = TARGET - t.kcal;
     var isToday = view === today;
     if (left < 0) { hero.classList.add('over'); prog.classList.add('over'); }
@@ -144,10 +171,7 @@
       el('p', 'kcal-left' + (left < 0 ? ' over' : ''), left >= 0 ? fmtN(left) + ' kcal übrig' : fmtN(-left) + ' kcal drüber'),
       el('p', 'kcal-max', fmtN(TARGET) + ' kcal max')
     );
-    var bal = balanceBefore(view);
     if (bal.n > 0) {
-      var carry = round50(bal.sum);
-      var budget = Math.max(0, TARGET - carry);
       var leftAdj = budget - t.kcal;
       var box2 = el('div', 'kcal-bal');
       box2.append(
