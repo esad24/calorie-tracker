@@ -1,0 +1,56 @@
+/* Layout: one column. Day navigation and the day's calories lead, then the add-a-meal card, the day's nutrient totals, one table card per meal (food rows with editable amount and unit, plus a meal total), a 30-day chart with a target line, and a history of earlier days in the same table form. */
+:root {
+  color-scheme: dark;
+  --bg: #060A13;
+  --panel: #0E1524;
+  --tint: #151E33;
+  --fg: #E9EFFF;
+  --muted: #8C9AB8;
+  --line: #1D2842;
+  --accent: #3F6BF2;
+  --accent-soft: #263250;
+  --over: #FF2C63;
+  --ring-1: #22D3EE;
+  --ring-2: #4F7CFF;
+  --ring-3: #A78BFA;
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+  --edge: rgba(255, 255, 255, 0.06);
+  --good: #34D399;
+  --warn: #F59E5B;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F2F5FB;
+  --panel: #FFFFFF;
+  --tint: #EAF0FB;
+  --fg: #0E1830;
+  --muted: #5A6785;
+  --line: #D6DEEE;
+  --accent: #3F6BF2;
+  --accent-soft: #BFD0FA;
+  --over: #D40045;
+  --edge: rgba(14, 24, 48, 0.08);
+  --good: #0F9F6E;
+  --warn: #D9701A;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+}
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-block: 24px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
